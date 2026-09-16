@@ -1,10 +1,7 @@
 import Link from "next/link";
-import { load as yamlLoad } from "js-yaml";
-import { ArrowRight, FileArchive } from "lucide-react";
 
 import Banner from "./components/Banner/Banner";
 import Partners from "./components/Partners/Partners";
-import News from "./components/News/News";
 import SizesTable from "./components/SizesTable/SizesTable";
 import { removeLanguage } from "../../hooks/hooks";
 import { callPythonReadData } from "@/lib/pythonClient";
@@ -26,21 +23,10 @@ export const viewport = {
 
 export const revalidate = 50000;
 
-async function fetchText(url) {
-  const res = await fetch(url, { next: { revalidate } });
-  if (!res.ok) {
-    throw new Error(`Fetch failed (${res.status}) for ${url}`);
-  }
-  return res.text();
-}
-
 async function getHomeData() {
   const { languages: rawLanguages } = await callPythonReadData({
     languages: "True",
   });
-  const yamlText = await fetchText(
-    "https://raw.githubusercontent.com/lukasweymann/OPUS/refs/heads/patch-1/info/news.yaml",
-  );
   const corpora = await callPythonReadData({
     preprocessing: "xml",
     version: "latest",
@@ -49,8 +35,6 @@ async function getHomeData() {
     corpora: "True",
     version: "latest",
   });
-
-  const yamlToJson = yamlLoad(yamlText);
 
   // 1) Languages
   const cleanLanguages = rawLanguages.filter(
@@ -130,7 +114,6 @@ async function getHomeData() {
     totalCleanCorpora,
     biggestDatasetsPercentage,
     biggestDatasets,
-    yamlToJson,
   };
 }
 
@@ -142,15 +125,12 @@ export default async function Home() {
     totalCleanCorpora,
     biggestDatasetsPercentage,
     biggestDatasets,
-    yamlToJson,
   } = await getHomeData();
 
   return (
     <main className={s.page}>
       <div className={s.container}>
-        <Banner languageList={cleanLanguages}>
-          {yamlToJson && <News news={yamlToJson.NEWS} />}
-        </Banner>
+        <Banner />
 
         <section className={s.overview}>
           <div className={s.summary}>
@@ -178,14 +158,6 @@ export default async function Home() {
                 entire <span>OPUS</span> collection
               </p>
 
-              <Link href="/download-formats" className={s.formatLink}>
-                <FileArchive size={17} strokeWidth={1.8} aria-hidden="true" />
-                <span>
-                  Download formats
-                  <small>XML, Moses, TMX, plain text, and frequency files</small>
-                </span>
-                <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
-              </Link>
             </div>
           </div>
           <SizesTable corpora={biggestDatasets} />

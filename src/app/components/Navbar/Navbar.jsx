@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Braces, ChevronDown } from "lucide-react";
+import { Braces, ChevronDown, Compass, Library } from "lucide-react";
 
 import Logo from "../../../../public/logos/opus_medium.png";
 import LogoWhite from "../../../../public/logos/opus_medium-white.png";
@@ -15,55 +15,99 @@ import SearchWithSuspense from "../Search/SearchWithSuspense";
 import styles from "./Navbar.module.css";
 import buttonStyles from "@/styles/Buttons.module.css";
 
-const NAV_LINKS = [
-  { href: "/contact", label: "Contribute" },
-  { href: "/publications", label: "Publications" },
-  { href: "/corpora", label: "Corpora", variant: "secondary" },
-  { href: "/synthetic", label: "Synthetic", variant: "secondary" },
+const DASHBOARD_HREF =
+  "/mt?source=eng&target=fra&score=spbleu&benchmark=all&model=all";
+
+const NAV_GROUPS = [
   {
-    href: "/mt?source=eng&target=fra&score=spbleu&benchmark=all&model=all",
-    label: "Dashboard",
-    variant: "primary",
+    key: "explore",
+    label: "Explore",
+    Icon: Compass,
+    links: [
+      { href: "/corpora", label: "Corpora", desc: "Browse released corpora" },
+      {
+        href: "/synthetic",
+        label: "Synthetic",
+        desc: "Synthetic corpus collections",
+      },
+      {
+        href: DASHBOARD_HREF,
+        label: "Dashboard",
+        desc: "MT model scores and comparisons",
+      },
+    ],
+  },
+  {
+    key: "api",
+    label: "API",
+    Icon: Braces,
+    links: [
+      {
+        href: "/opusapi",
+        label: "OPUS API",
+        desc: "Corpus and language queries",
+      },
+      {
+        href: "/mt-api",
+        label: "MT API",
+        desc: "Evaluation scores and models",
+      },
+      {
+        href: "/synthetic-api",
+        label: "Synthetic API",
+        desc: "Synthetic collections and pairs",
+      },
+    ],
+  },
+  {
+    key: "info",
+    label: "Info",
+    Icon: Library,
+    links: [
+      {
+        href: "/download-formats",
+        label: "Data formats",
+        desc: "Download format reference",
+      },
+      {
+        href: "/publications",
+        label: "Publications",
+        desc: "Papers and citations",
+      },
+    ],
   },
 ];
 
-const API_LINKS = [
-  { href: "/opusapi", label: "OPUS API", desc: "Corpus and language queries" },
-  { href: "/mt-api", label: "MT API", desc: "Evaluation scores and models" },
-  {
-    href: "/synthetic-api",
-    label: "Synthetic API",
-    desc: "Synthetic collections and pairs",
-  },
-];
+const DESKTOP_NAV_GROUPS = [
+  NAV_GROUPS.find(({ key }) => key === "api"),
+  NAV_GROUPS.find(({ key }) => key === "info"),
+  NAV_GROUPS.find(({ key }) => key === "explore"),
+].filter(Boolean);
 
 export default function Navbar() {
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const apiIsActive = API_LINKS.some(
-    ({ href }) => pathname === href || pathname.startsWith(`${href}/`),
-  );
-  const apiRef = useRef(null);
+  const groupsRef = useRef(null);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [isApiOpen, setIsApiOpen] = useState(false);
-  const [isMobileApiOpen, setIsMobileApiOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState("");
+  const [openMobileGroup, setOpenMobileGroup] = useState("");
 
   const closeMenu = () => {
     setIsOpen(false);
-    setIsApiOpen(false);
-    setIsMobileApiOpen(false);
+    setOpenGroup("");
+    setOpenMobileGroup("");
   };
 
   useEffect(() => {
     function onPointerDown(event) {
-      if (!apiRef.current?.contains(event.target)) {
-        setIsApiOpen(false);
+      if (!groupsRef.current?.contains(event.target)) {
+        setOpenGroup("");
       }
     }
 
     function onKeyDown(event) {
-      if (event.key === "Escape") setIsApiOpen(false);
+      if (event.key === "Escape") setOpenGroup("");
     }
 
     document.addEventListener("pointerdown", onPointerDown);
@@ -75,16 +119,13 @@ export default function Navbar() {
     };
   }, []);
 
-  const variantClass = {
-    primary: buttonStyles.primaryButton,
-    secondary: buttonStyles.secondaryButton,
-    tertiary: buttonStyles.tertiaryButton,
-  };
-
   const isActiveHref = (href) => {
     const path = href.split("?")[0];
-    return pathname === path || (path !== "/" && pathname.startsWith(`${path}/`));
+    return (
+      pathname === path || (path !== "/" && pathname.startsWith(`${path}/`))
+    );
   };
+  const groupIsActive = (links) => links.some(({ href }) => isActiveHref(href));
 
   return (
     <nav className={styles.nav}>
@@ -112,63 +153,78 @@ export default function Navbar() {
       </div>
 
       {/* Desktop navigation */}
-      <div className={styles.actions}>
+      <div className={styles.actions} ref={groupsRef}>
         <ThemeToggle />
-        <div className={styles.apiGroup} ref={apiRef}>
-          <button
-            type="button"
-            className={`${styles.apiButton} ${buttonStyles.secondaryButton} ${
-              apiIsActive ? styles.apiActive : ""
-            }`}
-            aria-haspopup="menu"
-            aria-expanded={isApiOpen}
-            aria-controls="api-menu"
-            onClick={() => setIsApiOpen((open) => !open)}
-          >
-            <Braces size={16} aria-hidden="true" />
-            <span>API</span>
-            <ChevronDown
-              size={15}
-              className={`${styles.chevron} ${
-                isApiOpen ? styles.chevronOpen : ""
-              }`}
-              aria-hidden="true"
-            />
-          </button>
-
-          <div
-            id="api-menu"
-            className={`${styles.apiMenu} ${
-              isApiOpen ? styles.apiMenuOpen : ""
-            }`}
-            role="menu"
-          >
-            {API_LINKS.map(({ href, label, desc }) => (
-              <Link
-                key={href}
-                href={href}
-                className={styles.apiMenuLink}
-                role="menuitem"
-                onClick={() => setIsApiOpen(false)}
+        <Link
+          href="/contact"
+          className={`${styles.contributeLink} ${
+            isActiveHref("/contact") ? styles.contributeLinkActive : ""
+          }`}
+          aria-current={isActiveHref("/contact") ? "page" : undefined}
+        >
+          Contribute
+        </Link>
+        {DESKTOP_NAV_GROUPS.map(({ key, label, Icon, links }) => {
+          const isExplore = key === "explore";
+          return (
+            <div className={styles.navGroup} key={key}>
+              <button
+                type="button"
+                className={`${styles.groupButton} ${
+                  isExplore
+                    ? `${buttonStyles.primaryButton} ${styles.exploreButton}`
+                    : buttonStyles.secondaryButton
+                } ${
+                  groupIsActive(links)
+                    ? isExplore
+                      ? styles.exploreActive
+                      : styles.groupActive
+                    : ""
+                }`}
+                aria-haspopup="menu"
+                aria-expanded={openGroup === key}
+                aria-controls={`${key}-menu`}
+                onClick={() =>
+                  setOpenGroup((open) => (open === key ? "" : key))
+                }
               >
-                <span className={styles.apiMenuTitle}>{label}</span>
-                <span className={styles.apiMenuDesc}>{desc}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-        {NAV_LINKS.map(({ href, label, variant }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`${styles.link} ${variant ? variantClass[variant] : ""} ${
-              isActiveHref(href) ? styles.linkActive : ""
-            }`}
-            aria-current={isActiveHref(href) ? "page" : undefined}
-          >
-            {label}
-          </Link>
-        ))}
+                <Icon size={16} aria-hidden="true" />
+                <span>{label}</span>
+                <ChevronDown
+                  size={15}
+                  className={`${styles.chevron} ${
+                    openGroup === key ? styles.chevronOpen : ""
+                  }`}
+                  aria-hidden="true"
+                />
+              </button>
+
+              <div
+                id={`${key}-menu`}
+                className={`${styles.navMenu} ${
+                  openGroup === key ? styles.navMenuOpen : ""
+                }`}
+                role="menu"
+              >
+                {links.map(({ href, label: itemLabel, desc }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`${styles.navMenuLink} ${
+                      isActiveHref(href) ? styles.navMenuLinkActive : ""
+                    }`}
+                    role="menuitem"
+                    aria-current={isActiveHref(href) ? "page" : undefined}
+                    onClick={() => setOpenGroup("")}
+                  >
+                    <span className={styles.navMenuTitle}>{itemLabel}</span>
+                    <span className={styles.navMenuDesc}>{desc}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Mobile menu toggle */}
@@ -180,7 +236,7 @@ export default function Navbar() {
         aria-controls="site-menu"
         onClick={() => {
           setIsOpen((open) => {
-            if (open) setIsMobileApiOpen(false);
+            if (open) setOpenMobileGroup("");
             return !open;
           });
         }}
@@ -196,62 +252,63 @@ export default function Navbar() {
         className={`${styles.menu} ${isOpen ? styles.menuOpen : ""}`}
       >
         <ThemeToggle />
-        <div className={styles.mobileGroup}>
-          <button
-            type="button"
-            className={`${styles.mobileApiButton} ${
-              apiIsActive ? styles.menuLinkActive : ""
-            }`}
-            aria-expanded={isMobileApiOpen}
-            aria-controls="mobile-api-menu"
-            onClick={() => setIsMobileApiOpen((open) => !open)}
-          >
-            <span className={styles.mobileApiLabel}>
-              <Braces size={16} aria-hidden="true" />
-              API
-            </span>
-            <ChevronDown
-              size={16}
-              className={`${styles.chevron} ${
-                isMobileApiOpen ? styles.chevronOpen : ""
+        <Link
+          href="/contact"
+          className={`${styles.mobileContribute} ${
+            isActiveHref("/contact") ? styles.mobileContributeActive : ""
+          }`}
+          aria-current={isActiveHref("/contact") ? "page" : undefined}
+          onClick={closeMenu}
+        >
+          Contribute
+        </Link>
+        {NAV_GROUPS.map(({ key, label, Icon, links }) => (
+          <div className={styles.mobileGroup} key={key}>
+            <button
+              type="button"
+              className={`${styles.mobileGroupButton} ${
+                groupIsActive(links) ? styles.menuLinkActive : ""
               }`}
-              aria-hidden="true"
-            />
-          </button>
-
-          <div
-            id="mobile-api-menu"
-            className={`${styles.mobileApiMenu} ${
-              isMobileApiOpen ? styles.mobileApiMenuOpen : ""
-            }`}
-          >
-            {API_LINKS.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`${styles.mobileApiLink} ${
-                  isActiveHref(href) ? styles.menuLinkActive : ""
-                }`}
-                aria-current={isActiveHref(href) ? "page" : undefined}
-                onClick={closeMenu}
-              >
+              aria-expanded={openMobileGroup === key}
+              aria-controls={`mobile-${key}-menu`}
+              onClick={() =>
+                setOpenMobileGroup((open) => (open === key ? "" : key))
+              }
+            >
+              <span className={styles.mobileGroupLabel}>
+                <Icon size={16} aria-hidden="true" />
                 {label}
-              </Link>
-            ))}
+              </span>
+              <ChevronDown
+                size={16}
+                className={`${styles.chevron} ${
+                  openMobileGroup === key ? styles.chevronOpen : ""
+                }`}
+                aria-hidden="true"
+              />
+            </button>
+
+            <div
+              id={`mobile-${key}-menu`}
+              className={`${styles.mobileSubmenu} ${
+                openMobileGroup === key ? styles.mobileSubmenuOpen : ""
+              }`}
+            >
+              {links.map(({ href, label: itemLabel }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`${styles.mobileSubmenuLink} ${
+                    isActiveHref(href) ? styles.menuLinkActive : ""
+                  }`}
+                  aria-current={isActiveHref(href) ? "page" : undefined}
+                  onClick={closeMenu}
+                >
+                  {itemLabel}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-        {NAV_LINKS.map(({ href, label, variant }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`${styles.menuLink} ${
-              variant === "primary" ? variantClass[variant] : ""
-            } ${isActiveHref(href) ? styles.menuLinkActive : ""}`}
-            aria-current={isActiveHref(href) ? "page" : undefined}
-            onClick={closeMenu}
-          >
-            {label}
-          </Link>
         ))}
       </div>
     </nav>

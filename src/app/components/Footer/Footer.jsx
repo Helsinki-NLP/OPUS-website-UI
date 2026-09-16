@@ -37,9 +37,9 @@ export default function Footer() {
           </section>
 
           <section className={s.col}>
-            <h3 className={s.h3}>Query</h3>
+            <h3 className={s.h3}>Search</h3>
 
-            <nav className={s.nav} aria-label="Query tools">
+            <nav className={s.nav} aria-label="Search tools">
               <a
                 className={s.link}
                 href="https://opus.nlpl.eu/bin/opuscqp.pl"

@@ -23,9 +23,35 @@ const SITE_HEADER = `
     </a>
     <nav class="api-docs-actions" aria-label="Primary navigation">
       <button class="api-docs-theme" type="button" aria-label="Toggle theme" aria-pressed="false" title="Light mode">☀️</button>
-      <div class="api-docs-api-group">
-        <button class="api-docs-api-button api-docs-secondary" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="api-docs-api-menu">
-          <svg class="api-docs-api-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="api-docs-nav-group api-docs-nav-group-explore">
+        <button class="api-docs-group-button api-docs-secondary api-docs-explore-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="api-docs-explore-menu">
+          <svg class="api-docs-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+          </svg>
+          <span>Explore</span>
+          <svg class="api-docs-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"></path>
+          </svg>
+        </button>
+        <div class="api-docs-nav-menu" id="api-docs-explore-menu" role="menu">
+          <a href="/corpora" role="menuitem">
+            <span class="api-docs-nav-title">Corpora</span>
+            <span class="api-docs-nav-desc">Browse released corpora</span>
+          </a>
+          <a href="/synthetic" role="menuitem">
+            <span class="api-docs-nav-title">Synthetic</span>
+            <span class="api-docs-nav-desc">Synthetic corpus collections</span>
+          </a>
+          <a href="/mt?source=eng&target=fra&score=spbleu&benchmark=all&model=all" role="menuitem">
+            <span class="api-docs-nav-title">Dashboard</span>
+            <span class="api-docs-nav-desc">MT model scores and comparisons</span>
+          </a>
+        </div>
+      </div>
+      <div class="api-docs-nav-group api-docs-nav-group-api">
+        <button class="api-docs-group-button api-docs-secondary" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="api-docs-api-menu">
+          <svg class="api-docs-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"></path>
             <path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path>
           </svg>
@@ -34,26 +60,44 @@ const SITE_HEADER = `
             <path d="m6 9 6 6 6-6"></path>
           </svg>
         </button>
-        <div class="api-docs-api-menu" id="api-docs-api-menu" role="menu">
+        <div class="api-docs-nav-menu" id="api-docs-api-menu" role="menu">
           <a href="/opusapi" role="menuitem" data-api-page="opusapi">
-            <span class="api-docs-api-title">OPUS API</span>
-            <span class="api-docs-api-desc">Corpus and language queries</span>
+            <span class="api-docs-nav-title">OPUS API</span>
+            <span class="api-docs-nav-desc">Corpus and language queries</span>
           </a>
           <a href="/mt-api" role="menuitem" data-api-page="mt-api">
-            <span class="api-docs-api-title">MT API</span>
-            <span class="api-docs-api-desc">Evaluation scores and models</span>
+            <span class="api-docs-nav-title">MT API</span>
+            <span class="api-docs-nav-desc">Evaluation scores and models</span>
           </a>
           <a href="/synthetic-api" role="menuitem" data-api-page="synthetic-api">
-            <span class="api-docs-api-title">Synthetic API</span>
-            <span class="api-docs-api-desc">Synthetic collections and pairs</span>
+            <span class="api-docs-nav-title">Synthetic API</span>
+            <span class="api-docs-nav-desc">Synthetic collections and pairs</span>
           </a>
         </div>
       </div>
-      <a class="api-docs-link" href="/contact">Contribute</a>
-      <a class="api-docs-link" href="/publications">Publications</a>
-      <a class="api-docs-link api-docs-secondary" href="/corpora">Corpora</a>
-      <a class="api-docs-link api-docs-secondary" href="/synthetic">Synthetic</a>
-      <a class="api-docs-link api-docs-primary" href="/mt?source=eng&target=fra&score=spbleu&benchmark=all&model=all">Dashboard</a>
+      <div class="api-docs-nav-group api-docs-nav-group-resources">
+        <button class="api-docs-group-button api-docs-secondary" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="api-docs-resources-menu">
+          <svg class="api-docs-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 7v14"></path>
+            <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path>
+          </svg>
+          <span>Resources</span>
+          <svg class="api-docs-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"></path>
+          </svg>
+        </button>
+        <div class="api-docs-nav-menu" id="api-docs-resources-menu" role="menu">
+          <a href="/download-formats" role="menuitem">
+            <span class="api-docs-nav-title">Data formats</span>
+            <span class="api-docs-nav-desc">Download format reference</span>
+          </a>
+          <a href="/publications" role="menuitem">
+            <span class="api-docs-nav-title">Publications</span>
+            <span class="api-docs-nav-desc">Papers and citations</span>
+          </a>
+        </div>
+      </div>
+      <a class="api-docs-link api-docs-contribute-link" href="/contact">Contribute</a>
     </nav>
     <button class="api-docs-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="api-docs-mobile-menu">
       <span class="api-docs-burger-line"></span>
@@ -62,10 +106,29 @@ const SITE_HEADER = `
     </button>
     <nav class="api-docs-mobile-menu" id="api-docs-mobile-menu" aria-label="Mobile navigation">
       <button class="api-docs-theme api-docs-mobile-theme" type="button" aria-label="Toggle theme" aria-pressed="false" title="Light mode">☀️</button>
-      <div class="api-docs-mobile-group">
-        <button class="api-docs-mobile-api" type="button" aria-expanded="false" aria-controls="api-docs-mobile-api-menu">
-          <span class="api-docs-mobile-api-label">
-            <svg class="api-docs-api-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="api-docs-mobile-group api-docs-mobile-group-explore">
+        <button class="api-docs-mobile-group-button" type="button" aria-expanded="false" aria-controls="api-docs-mobile-explore-menu">
+          <span class="api-docs-mobile-group-label">
+            <svg class="api-docs-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+            Explore
+          </span>
+          <svg class="api-docs-mobile-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"></path>
+          </svg>
+        </button>
+        <div class="api-docs-mobile-submenu" id="api-docs-mobile-explore-menu">
+          <a href="/corpora">Corpora</a>
+          <a href="/synthetic">Synthetic</a>
+          <a href="/mt?source=eng&target=fra&score=spbleu&benchmark=all&model=all">Dashboard</a>
+        </div>
+      </div>
+      <div class="api-docs-mobile-group api-docs-mobile-group-api">
+        <button class="api-docs-mobile-group-button" type="button" aria-expanded="false" aria-controls="api-docs-mobile-api-menu">
+          <span class="api-docs-mobile-group-label">
+            <svg class="api-docs-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"></path>
               <path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path>
             </svg>
@@ -75,17 +138,31 @@ const SITE_HEADER = `
             <path d="m6 9 6 6 6-6"></path>
           </svg>
         </button>
-        <div class="api-docs-mobile-api-menu" id="api-docs-mobile-api-menu">
+        <div class="api-docs-mobile-submenu" id="api-docs-mobile-api-menu">
           <a href="/opusapi" data-api-page="opusapi">OPUS API</a>
           <a href="/mt-api" data-api-page="mt-api">MT API</a>
           <a href="/synthetic-api" data-api-page="synthetic-api">Synthetic API</a>
         </div>
       </div>
-      <a class="api-docs-mobile-link" href="/contact">Contribute</a>
-      <a class="api-docs-mobile-link" href="/publications">Publications</a>
-      <a class="api-docs-mobile-link" href="/corpora">Corpora</a>
-      <a class="api-docs-mobile-link" href="/synthetic">Synthetic</a>
-      <a class="api-docs-mobile-link api-docs-mobile-primary" href="/mt?source=eng&target=fra&score=spbleu&benchmark=all&model=all">Dashboard</a>
+      <div class="api-docs-mobile-group api-docs-mobile-group-resources">
+        <button class="api-docs-mobile-group-button" type="button" aria-expanded="false" aria-controls="api-docs-mobile-resources-menu">
+          <span class="api-docs-mobile-group-label">
+            <svg class="api-docs-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 7v14"></path>
+              <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path>
+            </svg>
+            Resources
+          </span>
+          <svg class="api-docs-mobile-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"></path>
+          </svg>
+        </button>
+        <div class="api-docs-mobile-submenu" id="api-docs-mobile-resources-menu">
+          <a href="/download-formats">Data formats</a>
+          <a href="/publications">Publications</a>
+        </div>
+      </div>
+      <a class="api-docs-mobile-link api-docs-mobile-contribute" href="/contact">Contribute</a>
     </nav>
   </header>
 `;
@@ -95,33 +172,34 @@ const SITE_FOOTER = `
     <div class="api-docs-footer-inner">
       <div class="api-docs-footer-cols">
         <section class="api-docs-footer-col">
-          <a class="api-docs-footer-head" href="/OPUS-Tools">
-            <h3>Tools & Info</h3>
-          </a>
-          <nav class="api-docs-footer-links" aria-label="Tools and info">
-            <a href="https://opus.nlpl.eu/opusapi/" target="_blank" rel="noreferrer">Opus API</a>
-            <a href="https://github.com/hplt-project/OpusTrainer" target="_blank" rel="noreferrer"><span>Opus</span> Trainer</a>
-            <a href="https://github.com/hplt-project/OpusCleaner" target="_blank" rel="noreferrer"><span>Opus</span> Cleaner</a>
-            <a href="https://opus.nlpl.eu/legacy/lex.php" target="_blank" rel="noreferrer"><span>Opus</span> Wordalign</a>
-            <a href="https://github.com/Helsinki-NLP/OpusFilter" target="_blank" rel="noreferrer">Opus Filter</a>
-            <a href="https://github.com/Helsinki-NLP/OPUS-translator" target="_blank" rel="noreferrer">Opus Translator</a>
-            <a class="api-docs-pill" href="https://github.com/Helsinki-NLP/OPUS" target="_blank" rel="noreferrer">GitHub</a>
+          <h3>Tools</h3>
+          <nav class="api-docs-footer-links" aria-label="Tools">
+            <a href="https://pypi.org/project/opustools/" target="_blank" rel="noreferrer">Opus Tools</a>
+            <a href="https://pypi.org/project/opusfilter/" target="_blank" rel="noreferrer">Opus Filter</a>
+            <a href="https://github.com/Helsinki-NLP/OpusDistillery" target="_blank" rel="noreferrer">OPUS Distillery</a>
           </nav>
         </section>
         <section class="api-docs-footer-col">
-          <nav class="api-docs-footer-links" aria-label="More tools">
+          <h3>Search</h3>
+          <nav class="api-docs-footer-links" aria-label="Search tools">
             <a href="https://opus.nlpl.eu/bin/opuscqp.pl" target="_blank" rel="noreferrer">Opus Query</a>
-            <a href="https://github.com/Helsinki-NLP/OpusTools" target="_blank" rel="noreferrer">Opus Tools (Python Package)</a>
-            <a href="https://github.com/Helsinki-NLP/OpusTools-perl" target="_blank" rel="noreferrer">Opus Tools (Perl Package)</a>
-            <a href="https://github.com/thammegowda/mtdata" target="_blank" rel="noreferrer">MT-Data</a>
-            <a href="https://github.com/robertostling/eflomal" target="_blank" rel="noreferrer">Eflomal Word Aligner</a>
-            <a class="api-docs-cta" href="/contact">Contribute to OPUS</a>
-            <p>Icons by <a href="https://lucide.dev/license" target="_blank" rel="noreferrer">Lucide</a></p>
+            <a href="https://opus.nlpl.eu/legacy/lex.php" target="_blank" rel="noreferrer">Opus Wordalign</a>
+            <a href="https://opus.nlpl.eu/explore/" target="_blank" rel="noreferrer">Opus Explorer</a>
+          </nav>
+        </section>
+        <section class="api-docs-footer-col">
+          <h3>Translation</h3>
+          <nav class="api-docs-footer-links" aria-label="Translation tools">
+            <a href="https://github.com/Helsinki-NLP/OpusTranslate" target="_blank" rel="noreferrer">OpusTranslate MobileApp</a>
+            <a href="https://github.com/Helsinki-NLP/OPUS-MT-app" target="_blank" rel="noreferrer">OpusTranslate DesktopApp</a>
+            <a href="https://helsinki-nlp.github.io/OPUS-CAT/" target="_blank" rel="noreferrer">OPUS-CAT</a>
           </nav>
         </section>
       </div>
       <aside class="api-docs-footer-meta">
-        <a href="https://opus.nlpl.eu/legacy/" target="_blank" rel="noreferrer">Opus Legacy</a>
+        <a class="api-docs-footer-cta" href="/contact">Contribute to OPUS</a>
+        <a class="api-docs-footer-legacy" href="https://opus.nlpl.eu/legacy/" target="_blank" rel="noreferrer">Opus Legacy</a>
+        <a class="api-docs-footer-github" href="https://github.com/Helsinki-NLP/OPUS" target="_blank" rel="noreferrer">GitHub</a>
       </aside>
     </div>
   </footer>
@@ -130,11 +208,8 @@ const SITE_FOOTER = `
       var themeButtons = Array.prototype.slice.call(document.querySelectorAll(".api-docs-theme"));
       var burger = document.querySelector(".api-docs-burger");
       var menu = document.querySelector(".api-docs-mobile-menu");
-      var desktopApiGroup = document.querySelector(".api-docs-api-group");
-      var desktopApiButton = document.querySelector(".api-docs-api-button");
-      var desktopApiMenu = document.querySelector(".api-docs-api-menu");
-      var apiButton = document.querySelector(".api-docs-mobile-api");
-      var apiMenu = document.querySelector(".api-docs-mobile-api-menu");
+      var desktopGroups = Array.prototype.slice.call(document.querySelectorAll(".api-docs-nav-group"));
+      var mobileGroupButtons = Array.prototype.slice.call(document.querySelectorAll(".api-docs-mobile-group-button"));
 
       function updateThemeButtons(theme) {
         var isDark = theme === "dark";
@@ -162,32 +237,66 @@ const SITE_FOOTER = `
         button.addEventListener("click", toggleTheme);
       });
 
-      function closeDesktopApi() {
-        if (!desktopApiButton || !desktopApiMenu) return;
-        desktopApiButton.setAttribute("aria-expanded", "false");
-        desktopApiButton.classList.remove("api-docs-api-button-open");
-        desktopApiMenu.classList.remove("api-docs-api-menu-open");
+      function hrefMatchesCurrent(anchor) {
+        try {
+          var url = new URL(anchor.getAttribute("href"), window.location.origin);
+          var path = url.pathname;
+          return window.location.pathname === path || (path !== "/" && window.location.pathname.indexOf(path + "/") === 0);
+        } catch (e) {
+          return false;
+        }
       }
 
-      if (desktopApiButton && desktopApiMenu) {
-        desktopApiButton.addEventListener("click", function () {
-          var open = desktopApiButton.getAttribute("aria-expanded") === "true";
-          desktopApiButton.setAttribute("aria-expanded", String(!open));
-          desktopApiButton.classList.toggle("api-docs-api-button-open", !open);
-          desktopApiMenu.classList.toggle("api-docs-api-menu-open", !open);
-        });
-
-        desktopApiMenu.addEventListener("click", closeDesktopApi);
-
-        document.addEventListener("pointerdown", function (event) {
-          if (!desktopApiGroup || desktopApiGroup.contains(event.target)) return;
-          closeDesktopApi();
-        });
-
-        document.addEventListener("keydown", function (event) {
-          if (event.key === "Escape") closeDesktopApi();
+      function closeDesktopGroups(exceptButton) {
+        desktopGroups.forEach(function (group) {
+          var button = group.querySelector(".api-docs-group-button");
+          var submenu = group.querySelector(".api-docs-nav-menu");
+          if (!button || !submenu || button === exceptButton) return;
+          button.setAttribute("aria-expanded", "false");
+          button.classList.remove("api-docs-group-button-open");
+          submenu.classList.remove("api-docs-nav-menu-open");
         });
       }
+
+      desktopGroups.forEach(function (group) {
+        var button = group.querySelector(".api-docs-group-button");
+        var submenu = group.querySelector(".api-docs-nav-menu");
+        if (!button || !submenu) return;
+
+        button.addEventListener("click", function () {
+          var open = button.getAttribute("aria-expanded") === "true";
+          closeDesktopGroups(button);
+          button.setAttribute("aria-expanded", String(!open));
+          button.classList.toggle("api-docs-group-button-open", !open);
+          submenu.classList.toggle("api-docs-nav-menu-open", !open);
+        });
+
+        submenu.addEventListener("click", function () {
+          closeDesktopGroups();
+        });
+      });
+
+      document.addEventListener("pointerdown", function (event) {
+        var insideGroup = desktopGroups.some(function (group) {
+          return group.contains(event.target);
+        });
+        if (!insideGroup) closeDesktopGroups();
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") closeDesktopGroups();
+      });
+
+      document.querySelectorAll(".api-docs-nav-menu a, .api-docs-mobile-submenu a, .api-docs-link, .api-docs-mobile-link").forEach(function (anchor) {
+        if (!hrefMatchesCurrent(anchor)) return;
+        anchor.classList.add("api-docs-link-active");
+        var desktopGroup = anchor.closest(".api-docs-nav-group");
+        var desktopButton = desktopGroup && desktopGroup.querySelector(".api-docs-group-button");
+        if (desktopButton) desktopButton.classList.add("api-docs-group-active");
+        var mobileGroup = anchor.closest(".api-docs-mobile-group");
+        var mobileButton = mobileGroup && mobileGroup.querySelector(".api-docs-mobile-group-button");
+        if (mobileButton) mobileButton.classList.add("api-docs-link-active");
+      });
 
       if (burger && menu) {
         burger.addEventListener("click", function () {
@@ -197,25 +306,36 @@ const SITE_FOOTER = `
           burger.classList.toggle("api-docs-burger-open", !open);
           menu.classList.toggle("api-docs-mobile-menu-open", !open);
 
-          if (open && apiButton && apiMenu) {
-            apiButton.setAttribute("aria-expanded", "false");
-            apiMenu.classList.remove("api-docs-mobile-api-menu-open");
+          if (open) {
+            mobileGroupButtons.forEach(function (button) {
+              var submenu = document.getElementById(button.getAttribute("aria-controls"));
+              button.setAttribute("aria-expanded", "false");
+              if (submenu) submenu.classList.remove("api-docs-mobile-submenu-open");
+            });
           }
         });
       }
 
-      if (apiButton && apiMenu) {
-        apiButton.addEventListener("click", function () {
-          var open = apiButton.getAttribute("aria-expanded") === "true";
-          apiButton.setAttribute("aria-expanded", String(!open));
-          apiMenu.classList.toggle("api-docs-mobile-api-menu-open", !open);
+      mobileGroupButtons.forEach(function (button) {
+        var submenu = document.getElementById(button.getAttribute("aria-controls"));
+        if (!submenu) return;
+
+        button.addEventListener("click", function () {
+          var open = button.getAttribute("aria-expanded") === "true";
+          mobileGroupButtons.forEach(function (otherButton) {
+            var otherSubmenu = document.getElementById(otherButton.getAttribute("aria-controls"));
+            if (otherButton !== button) otherButton.setAttribute("aria-expanded", "false");
+            if (otherButton !== button && otherSubmenu) otherSubmenu.classList.remove("api-docs-mobile-submenu-open");
+          });
+          button.setAttribute("aria-expanded", String(!open));
+          submenu.classList.toggle("api-docs-mobile-submenu-open", !open);
         });
 
-        apiMenu.addEventListener("click", function () {
-          apiButton.setAttribute("aria-expanded", "false");
-          apiMenu.classList.remove("api-docs-mobile-api-menu-open");
+        submenu.addEventListener("click", function () {
+          button.setAttribute("aria-expanded", "false");
+          submenu.classList.remove("api-docs-mobile-submenu-open");
         });
-      }
+      });
     })();
   </script>
 `;
@@ -382,9 +502,40 @@ const SITE_STYLES = `
       text-decoration: none;
     }
 
-    .api-docs-api-button,
-    .api-docs-secondary,
-    .api-docs-primary {
+    .api-docs-contribute-link {
+      order: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.52rem 0.85rem;
+      border: 1px solid color-mix(in srgb, var(--link) 28%, var(--border));
+      border-radius: var(--radius-pill);
+      background: color-mix(in srgb, var(--surface-strong) 86%, var(--link));
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      font-weight: 650;
+      line-height: 1;
+      transition:
+        border-color 160ms ease,
+        background 160ms ease,
+        color 160ms ease,
+        transform 160ms ease;
+    }
+
+    .api-docs-contribute-link:hover,
+    .api-docs-contribute-link.api-docs-link-active {
+      border-color: color-mix(in srgb, var(--link) 42%, var(--border));
+      background: color-mix(in srgb, var(--surface-strong) 76%, var(--link));
+      color: var(--link-hover);
+      text-decoration: none;
+    }
+
+    .api-docs-contribute-link:active {
+      transform: translateY(1px);
+    }
+
+    .api-docs-group-button,
+    .api-docs-secondary {
       position: relative;
       overflow: hidden;
       display: inline-flex;
@@ -415,10 +566,8 @@ const SITE_STYLES = `
         filter 160ms ease;
     }
 
-    .api-docs-api-button::before,
-    .api-docs-secondary::before,
-    .api-docs-primary::before,
-    .api-docs-mobile-primary::before {
+    .api-docs-group-button::before,
+    .api-docs-secondary::before {
       content: "";
       position: absolute;
       inset: -1px;
@@ -430,24 +579,18 @@ const SITE_STYLES = `
       transition: opacity 160ms ease;
     }
 
-    .api-docs-api-button:hover::before,
-    .api-docs-secondary:hover::before,
-    .api-docs-primary:hover::before,
-    .api-docs-mobile-primary:hover::before {
+    .api-docs-group-button:hover::before,
+    .api-docs-secondary:hover::before {
       opacity: 1;
     }
 
-    .api-docs-api-button:active,
-    .api-docs-secondary:active,
-    .api-docs-primary:active,
-    .api-docs-mobile-primary:active {
+    .api-docs-group-button:active,
+    .api-docs-secondary:active {
       transform: translateY(1px);
     }
 
-    .api-docs-api-button:focus-visible,
-    .api-docs-secondary:focus-visible,
-    .api-docs-primary:focus-visible,
-    .api-docs-mobile-primary:focus-visible {
+    .api-docs-group-button:focus-visible,
+    .api-docs-secondary:focus-visible {
       outline: none;
       box-shadow: var(--ring), var(--shadow-sm), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
     }
@@ -495,16 +638,28 @@ const SITE_STYLES = `
         color-mix(in srgb, var(--surface) 92%, transparent));
     }
 
-    .api-docs-api-group {
+    .api-docs-nav-group {
       position: relative;
       display: inline-flex;
     }
 
-    .api-docs-api-button {
+    .api-docs-nav-group-api {
+      order: 2;
+    }
+
+    .api-docs-nav-group-resources {
+      order: 3;
+    }
+
+    .api-docs-nav-group-explore {
+      order: 4;
+    }
+
+    .api-docs-group-button {
       cursor: pointer;
     }
 
-    .api-docs-api-icon {
+    .api-docs-nav-icon {
       width: 16px;
       height: 16px;
       flex: 0 0 auto;
@@ -527,12 +682,12 @@ const SITE_STYLES = `
       transition: transform 160ms ease;
     }
 
-    .api-docs-api-button-open .api-docs-chevron,
-    .api-docs-mobile-api[aria-expanded="true"] .api-docs-mobile-chevron {
+    .api-docs-group-button-open .api-docs-chevron,
+    .api-docs-mobile-group-button[aria-expanded="true"] .api-docs-mobile-chevron {
       transform: rotate(180deg);
     }
 
-    .api-docs-api-menu {
+    .api-docs-nav-menu {
       position: absolute;
       top: calc(100% + 10px);
       right: 0;
@@ -551,13 +706,13 @@ const SITE_STYLES = `
       transition: opacity 160ms ease, transform 160ms ease;
     }
 
-    .api-docs-api-menu-open {
+    .api-docs-nav-menu-open {
       opacity: 1;
       pointer-events: auto;
       transform: translateY(0);
     }
 
-    .api-docs-api-menu a {
+    .api-docs-nav-menu a {
       display: grid;
       gap: 3px;
       padding: 10px 11px;
@@ -567,27 +722,26 @@ const SITE_STYLES = `
       transition: background 160ms ease, color 160ms ease;
     }
 
-    .api-docs-api-menu a:hover {
+    .api-docs-nav-menu a:hover,
+    .api-docs-nav-menu a.api-docs-link-active {
       color: var(--text-main);
       text-decoration: none;
       background: color-mix(in srgb, var(--accent-soft) 58%, transparent);
     }
 
-    .api-docs-api-title {
+    .api-docs-nav-title {
       font-size: 0.9rem;
       line-height: 1.25;
       font-weight: 750;
     }
 
-    .api-docs-api-desc {
+    .api-docs-nav-desc {
       font-size: 0.76rem;
       line-height: 1.35;
       color: var(--text-muted);
     }
 
-    .api-docs-opusapi .api-docs-api-button,
-    .api-docs-mtapi .api-docs-api-button,
-    .api-docs-syntheticapi .api-docs-api-button {
+    .api-docs-group-active {
       border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
       background: linear-gradient(135deg,
         color-mix(in srgb, var(--accent-soft) 65%, var(--surface-strong)),
@@ -595,41 +749,42 @@ const SITE_STYLES = `
       color: var(--text-main);
     }
 
-    .api-docs-opusapi [data-api-page="opusapi"],
-    .api-docs-mtapi [data-api-page="mt-api"],
-    .api-docs-syntheticapi [data-api-page="synthetic-api"] {
-      color: var(--link-hover);
-      background: color-mix(in srgb, var(--accent-soft) 58%, transparent);
-    }
-
-    .api-docs-primary {
+    .api-docs-explore-button {
+      padding-inline: 1rem;
       color: #ffffff;
-      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 92%, #000), var(--accent));
       border-color: color-mix(in srgb, var(--accent) 55%, rgba(148, 163, 184, 0.35));
+      background: linear-gradient(135deg,
+        color-mix(in srgb, var(--accent) 92%, #000),
+        var(--accent));
       box-shadow:
         0 14px 30px rgba(0, 0, 0, 0.22),
         0 0 0 1px rgba(15, 23, 42, 0.65),
         0 0 24px rgba(142, 117, 255, 0.18);
     }
 
-    .api-docs-primary:hover {
+    .api-docs-explore-button:hover,
+    .api-docs-explore-button.api-docs-group-active {
       color: #ffffff;
       filter: brightness(1.05);
+      background: linear-gradient(135deg,
+        color-mix(in srgb, var(--accent) 92%, #000),
+        var(--accent));
       box-shadow:
         0 16px 34px rgba(0, 0, 0, 0.26),
         0 0 0 1px rgba(15, 23, 42, 0.75),
         0 0 30px rgba(142, 117, 255, 0.24);
     }
 
+    .api-docs-link-active {
+      color: var(--link-hover);
+      background: color-mix(in srgb, var(--accent-soft) 58%, transparent);
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      .api-docs-api-button,
-      .api-docs-api-button::before,
+      .api-docs-group-button,
+      .api-docs-group-button::before,
       .api-docs-secondary,
-      .api-docs-secondary::before,
-      .api-docs-primary,
-      .api-docs-primary::before,
-      .api-docs-mobile-primary,
-      .api-docs-mobile-primary::before {
+      .api-docs-secondary::before {
         transition: none;
       }
     }
@@ -688,7 +843,7 @@ const SITE_STYLES = `
     }
 
     .api-docs-mobile-link,
-    .api-docs-mobile-api {
+    .api-docs-mobile-group-button {
       min-height: 42px;
       padding: 12px 0;
       border: 0;
@@ -708,43 +863,41 @@ const SITE_STYLES = `
     }
 
     .api-docs-mobile-link:hover,
-    .api-docs-mobile-api:hover {
+    .api-docs-mobile-group-button:hover {
       color: var(--link-hover);
       text-decoration: none;
     }
 
-    .api-docs-mobile-primary {
-      position: relative;
-      overflow: hidden;
-      justify-content: center;
-      margin-top: 10px;
-      padding: 0.52rem 0.9rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid color-mix(in srgb, var(--accent) 55%, rgba(148, 163, 184, 0.35));
-      color: #ffffff;
-      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 92%, #000), var(--accent));
-      box-shadow:
-        0 14px 30px rgba(0, 0, 0, 0.22),
-        0 0 0 1px rgba(15, 23, 42, 0.65),
-        0 0 24px rgba(142, 117, 255, 0.18);
-      font-weight: 600;
-      line-height: 1;
-      transition:
-        background-color 160ms ease,
-        border-color 160ms ease,
-        color 160ms ease,
-        box-shadow 160ms ease,
-        transform 160ms ease,
-        filter 160ms ease;
+    .api-docs-mobile-theme {
+      order: 0;
     }
 
-    .api-docs-mobile-primary:hover {
-      color: #ffffff;
-      filter: brightness(1.05);
-      box-shadow:
-        0 16px 34px rgba(0, 0, 0, 0.26),
-        0 0 0 1px rgba(15, 23, 42, 0.75),
-        0 0 30px rgba(142, 117, 255, 0.24);
+    .api-docs-mobile-contribute {
+      order: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      width: fit-content;
+      margin: 4px 0 10px;
+      padding: 0.58rem 0.9rem;
+      border: 1px solid color-mix(in srgb, var(--link) 30%, var(--border));
+      border-radius: var(--radius-pill);
+      background: color-mix(in srgb, var(--surface-strong) 84%, var(--link));
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+      font-size: 0.95rem;
+      line-height: 1;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .api-docs-mobile-contribute:hover,
+    .api-docs-mobile-contribute.api-docs-link-active {
+      border-color: color-mix(in srgb, var(--link) 44%, var(--border));
+      background: color-mix(in srgb, var(--surface-strong) 74%, var(--link));
+      color: var(--link-hover);
+      text-decoration: none;
     }
 
     .api-docs-mobile-group {
@@ -752,7 +905,19 @@ const SITE_STYLES = `
       border-bottom: 1px solid var(--border);
     }
 
-    .api-docs-mobile-api {
+    .api-docs-mobile-group-explore {
+      order: 2;
+    }
+
+    .api-docs-mobile-group-api {
+      order: 3;
+    }
+
+    .api-docs-mobile-group-resources {
+      order: 4;
+    }
+
+    .api-docs-mobile-group-button {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -760,25 +925,25 @@ const SITE_STYLES = `
       cursor: pointer;
     }
 
-    .api-docs-mobile-api-label {
+    .api-docs-mobile-group-label {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       font-weight: 700;
     }
 
-    .api-docs-mobile-api-menu {
+    .api-docs-mobile-submenu {
       display: none;
     }
 
-    .api-docs-mobile-api-menu-open {
+    .api-docs-mobile-submenu-open {
       display: grid;
       gap: 0;
       padding: 0 0 8px 10px;
       border-left: 1px solid var(--border);
     }
 
-    .api-docs-mobile-api-menu a {
+    .api-docs-mobile-submenu a {
       display: flex;
       align-items: center;
       min-height: 38px;
@@ -787,7 +952,8 @@ const SITE_STYLES = `
       text-decoration: none;
     }
 
-    .api-docs-mobile-api-menu a:hover {
+    .api-docs-mobile-submenu a:hover,
+    .api-docs-mobile-submenu a.api-docs-link-active {
       color: var(--link-hover);
       text-decoration: none;
     }
@@ -1073,7 +1239,12 @@ const SITE_STYLES = `
     }
 
     .api-docs-footer {
-      background: var(--bg);
+      background:
+        linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--surface-strong) 42%, transparent),
+          var(--bg)
+        );
       color: var(--text-main);
       border-top: 1px solid var(--border);
     }
@@ -1090,94 +1261,132 @@ const SITE_STYLES = `
     }
 
     .api-docs-footer-cols {
-      display: flex;
-      gap: clamp(24px, 6vw, 100px);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(160px, 1fr));
+      gap: clamp(22px, 5vw, 76px);
       flex-wrap: wrap;
       min-width: 280px;
-      flex: 1 1 560px;
+      flex: 1 1 720px;
     }
 
     .api-docs-footer-col {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       min-width: 240px;
     }
 
     .api-docs-footer h3 {
       margin: 0;
-      font-size: var(--text-small);
+      font-size: var(--text-label);
       line-height: 1.35;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .api-docs-footer-head {
-      width: fit-content;
-      text-decoration: none;
+      color: var(--link);
+      text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 32%, transparent);
     }
 
     .api-docs-footer-links {
       display: grid;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .api-docs-footer a,
-    .api-docs-footer p {
-      color: var(--text-muted);
+    .api-docs-footer-links a {
+      position: relative;
+      color: color-mix(in srgb, var(--text-main) 88%, var(--link));
+      text-decoration: none;
       font-size: var(--text-small);
       line-height: 1.55;
       width: fit-content;
+      padding-left: 0;
+      transition:
+        color 140ms ease,
+        padding-left 140ms ease;
     }
 
-    .api-docs-footer p {
-      margin: 14px 0 0;
-      font-size: 0.92rem;
+    .api-docs-footer-links a::before {
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      content: "->";
+      opacity: 0;
+      transform: translateX(-6px);
+      transition:
+        opacity 140ms ease,
+        transform 140ms ease;
     }
 
-    .api-docs-footer-links span {
-      font-family: var(--font-mono);
-      font-weight: 700;
+    .api-docs-footer-links a:hover,
+    .api-docs-footer-links a:focus-visible {
+      color: var(--link-hover);
+      padding-left: 1.05rem;
+      outline: none;
+      text-decoration: none;
     }
 
-    .api-docs-pill {
-      margin-top: 10px;
-      padding: 0.28rem 0.55rem;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--border);
-      background: var(--surface-strong);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .api-docs-cta {
-      margin-top: 12px;
-      padding: 0.52rem 0.85rem;
-      border-radius: var(--radius-pill);
-      font-weight: 650;
-      color: #fff !important;
-      background: var(--accent);
-      border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border));
-      box-shadow: var(--shadow-sm);
+    .api-docs-footer-links a:hover::before,
+    .api-docs-footer-links a:focus-visible::before {
+      opacity: 1;
+      transform: translateX(0);
     }
 
     .api-docs-footer-meta {
       display: flex;
-      align-items: flex-end;
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
       flex: 0 0 auto;
+      min-width: 188px;
     }
 
-    .api-docs-footer-meta a {
+    .api-docs-footer-cta,
+    .api-docs-footer-legacy,
+    .api-docs-footer-github {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
       text-transform: uppercase;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.14em;
       font-size: var(--text-label);
       line-height: 1.35;
-      padding: 0.5rem 0.65rem;
+      text-align: center;
+      padding: 0.58rem 0.76rem;
       border-radius: var(--radius-pill);
-      background: var(--surface-strong);
-      border: 1px solid var(--border);
+      background: color-mix(in srgb, var(--surface-strong) 82%, var(--accent));
+      border: 1px solid color-mix(in srgb, var(--link) 34%, var(--border));
       color: var(--text-main);
-      box-shadow: var(--shadow-sm);
+      box-shadow:
+        var(--shadow-sm),
+        0 0 20px color-mix(in srgb, var(--accent) 14%, transparent);
+    }
+
+    .api-docs-footer-cta {
+      color: #101827;
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--accent) 58%, #fff),
+        color-mix(in srgb, var(--accent) 74%, #fff)
+      );
+      border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+    }
+
+    .api-docs-footer-github {
+      color: color-mix(in srgb, var(--text-main) 86%, var(--link));
+      background: color-mix(in srgb, var(--surface-strong) 92%, var(--link));
+    }
+
+    .api-docs-footer-cta:hover,
+    .api-docs-footer-legacy:hover,
+    .api-docs-footer-github:hover {
+      color: var(--link-hover);
+      border-color: color-mix(in srgb, var(--link) 28%, var(--border));
+      text-decoration: none;
+    }
+
+    .api-docs-footer-cta:hover {
+      color: #101827;
+      filter: brightness(1.05);
     }
 
     @media (max-width: 1024px) {
@@ -1207,6 +1416,20 @@ const SITE_STYLES = `
         border-bottom: 1px solid var(--border);
         box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28), var(--shadow-sm);
         z-index: 1500;
+      }
+
+      .api-docs-footer-cols {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .api-docs-footer-col {
+        min-width: 0;
+      }
+
+      .api-docs-footer-meta {
+        align-items: flex-start;
+        width: 100%;
       }
     }
 

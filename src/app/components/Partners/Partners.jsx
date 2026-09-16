@@ -48,7 +48,7 @@ export default function Partners() {
       name: "LetsMT",
       light: letsmt,
       dark: letsmtDark,
-      url: "https://www.letsmt.eu/",
+      url: "http://project.letsmt.eu",
     },
   ];
 

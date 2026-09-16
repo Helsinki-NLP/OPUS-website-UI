@@ -5,9 +5,11 @@ import Logo from "@/../public/logos/banner-logo.png";
 import LogoDark from "@/../public/logos/banner-logo-white.png";
 
 export default function Banner({ children }) {
+  const hasNews = Boolean(children);
+
   return (
     <section className={s.wrap}>
-      <div className={s.content}>
+      <div className={`${s.content} ${hasNews ? "" : s.contentNoNews}`}>
         {children && <div className={s.news}>{children}</div>}
         <Image
           src={Logo}

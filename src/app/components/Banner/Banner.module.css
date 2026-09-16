@@ -31,6 +31,11 @@
     box-sizing: border-box;
 }
 
+.contentNoNews {
+    grid-template-areas: "logo search";
+    row-gap: 0;
+}
+
 .news {
     grid-area: news;
     justify-self: start;
@@ -98,6 +103,12 @@
         gap: clamp(22px, 6vw, 34px);
         min-height: auto;
         padding-block: clamp(34px, 8vw, 56px);
+    }
+
+    .contentNoNews {
+        grid-template-areas:
+            "logo"
+            "search";
     }
 
     .news {
