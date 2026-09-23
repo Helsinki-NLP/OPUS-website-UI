@@ -26,7 +26,7 @@ export async function GET(req) {
     } catch (err) {
         console.error("[/synthetic-api/items] Error:", err);
         return NextResponse.json(
-            { error: "items_failed", details: String(err?.message || err) },
+            { error: "items_failed" },
             { status: 500 }
         );
     }

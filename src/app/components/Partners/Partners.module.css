@@ -1,11 +1,10 @@
-/* components/Partners.module.css — trimmed, no partner-specific hacks */
-
 .wrap {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    place-items: center;
-    gap: clamp(16px, 6vw, 40px) clamp(32px, 8vw, 100px);
-    padding: 20px 0 60px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(16px, 6vw, 30px) clamp(32px, 8vw, 50px);
+    padding: 20px;
 }
 
 .link {
@@ -16,14 +15,48 @@
 
 .logo {
     display: block;
-    width: 120px;
-    /* consistent visual width */
+    width: var(--logo-width, 120px);
     height: auto;
-    /* keep aspect ratio */
     filter: saturate(1);
     transition: transform .12s ease;
 }
 
 .logo:hover {
     transform: translateY(-1px);
+}
+
+.nlplLogo {
+    --logo-width: 100px;
+}
+
+.helsinkiLogo {
+    --logo-width: 95px;
+}
+
+.cscLogo {
+    --logo-width: 110px;
+}
+
+.hpltLogo {
+    --logo-width: 85px;
+}
+
+.akaLogo {
+    --logo-width: 125px;
+}
+
+.letsmtLogo {
+    --logo-width: 110px;
+}
+
+.ercLogo {
+    --logo-width: 90px;
+}
+
+.kulturfondenLogo {
+    --logo-width: 65px;
+}
+
+.oellmLogo {
+    --logo-width: 120px;
 }

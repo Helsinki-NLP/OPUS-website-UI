@@ -397,7 +397,7 @@ export async function GET(req) {
     } catch (err) {
         console.error("[/mt-api] error:", err);
         return NextResponse.json(
-            { error: "scores_failed", details: String(err?.message || err) },
+            { error: "scores_failed" },
             { status: 500 }
         );
     }

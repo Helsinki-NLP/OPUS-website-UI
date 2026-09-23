@@ -17,7 +17,7 @@ export async function GET(req) {
     } catch (err) {
         console.error("[/synthetic-api/collections] Error:", err);
         return NextResponse.json(
-            { error: "collections_failed", details: String(err?.message || err) },
+            { error: "collections_failed" },
             { status: 500 }
         );
     }

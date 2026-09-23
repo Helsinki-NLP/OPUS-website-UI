@@ -35,6 +35,24 @@ function parseRoutePair(langpair = "") {
   return normalizePair(src, trg);
 }
 
+async function fetchLangs({ corpus, navbar, source, signal }) {
+  const corpusFilter = corpus && !navbar ? `&corpus=${corpus}` : "";
+  const sourceFilter =
+    source && corpus && !navbar
+      ? `&source=${source.replace("-", "_")}`
+      : "";
+  const response = await fetch(
+    `/opusapi/?languages=True${corpusFilter}${sourceFilter}`,
+    { method: "GET", signal },
+  );
+
+  const body = await response.json();
+  const clean = (body?.languages || []).filter(
+    (code) => !/\d/.test(code) && !removeLanguage.includes(code),
+  );
+  return { clean, mapped: codeToLangTransformer(clean) };
+}
+
 export default function Search({ mode, languageList, navbar, className = "" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -67,55 +85,45 @@ export default function Search({ mode, languageList, navbar, className = "" }) {
     setTrg(nextPair.trg);
   }, [langpair, pathname, searchString]);
 
-  async function fetchLangs(kind) {
-    const response = await fetch(
-      `/opusapi/?languages=True${corpus && !navbar ? `&corpus=${corpus}` : ""}${
-        kind === "trg" && corpus && !navbar
-          ? `&source=${src.replace("-", "_")}`
-          : ""
-      }`,
-      {
-        method: "GET",
-      },
-    );
-
-    const body = await response.json();
-    const raw = body?.languages || [];
-    const clean = raw.filter(
-      (code) => !/\d/.test(code) && !removeLanguage.includes(code),
-    );
-    const mapped = codeToLangTransformer(clean); // [{label,value}]
-
-    if (kind === "src") {
-      setSrcOpts(mapped);
-    } else {
-      setTrgOpts(mapped);
-      if (!clean.includes(trg)) setTrg("");
-    }
-  }
-
-  // Preload from prop if given
   useEffect(() => {
-    if (languageList && languageList.length) {
+    if (languageList) {
       setSrcOpts(languageList);
       return;
     }
-  }, [languageList]);
+
+    const controller = new AbortController();
+    fetchLangs({ corpus, navbar, signal: controller.signal })
+      .then(({ mapped }) => {
+        if (!controller.signal.aborted) setSrcOpts(mapped);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          console.error("Could not load source languages", error);
+        }
+      });
+
+    return () => controller.abort();
+  }, [languageList, corpus, navbar]);
 
   useEffect(() => {
-    if (!languageList) {
-      fetchLangs("src");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setTrgOpts([]);
+    if (!src) return;
 
-  useEffect(() => {
-    if (corpus) fetchLangs("src");
-  }, [corpus]);
+    const controller = new AbortController();
+    fetchLangs({ corpus, navbar, source: src, signal: controller.signal })
+      .then(({ clean, mapped }) => {
+        if (controller.signal.aborted) return;
+        setTrgOpts(mapped);
+        setTrg((current) => (clean.includes(current) ? current : ""));
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          console.error("Could not load target languages", error);
+        }
+      });
 
-  useEffect(() => {
-    if (src) fetchLangs("trg");
-  }, [src]);
+    return () => controller.abort();
+  }, [src, corpus, navbar]);
 
   function go() {
     if (!src || !trg) return;
@@ -140,7 +148,12 @@ export default function Search({ mode, languageList, navbar, className = "" }) {
         <MiniSelect
           options={srcOpts}
           value={src}
-          onChange={(v) => setSrc(v)}
+          onChange={(v) => {
+            if (v === src) return;
+            setSrc(v);
+            setTrg("");
+            setTrgOpts([]);
+          }}
           placeholder="Select source"
           disabled={false}
         />

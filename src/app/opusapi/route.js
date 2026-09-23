@@ -407,10 +407,7 @@ export async function GET(req) {
   } catch (err) {
     console.error("Error calling Python:", err);
     return NextResponse.json(
-      {
-        error: "python_failed",
-        details: err?.message || String(err),
-      },
+      { error: "python_failed" },
       { status: 500 }
     );
   }
