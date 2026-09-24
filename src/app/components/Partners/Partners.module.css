@@ -3,7 +3,7 @@
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: clamp(16px, 6vw, 30px) clamp(32px, 8vw, 50px);
+    gap: clamp(16px, 6vw, 20px) clamp(32px, 8vw, 35px);
     padding: 20px;
 }
 
@@ -26,19 +26,19 @@
 }
 
 .nlplLogo {
-    --logo-width: 100px;
-}
-
-.helsinkiLogo {
     --logo-width: 95px;
 }
 
+.helsinkiLogo {
+    --logo-width: 80px;
+}
+
 .cscLogo {
-    --logo-width: 110px;
+    --logo-width: 100px;
 }
 
 .hpltLogo {
-    --logo-width: 85px;
+    --logo-width: 75px;
 }
 
 .akaLogo {
@@ -46,17 +46,17 @@
 }
 
 .letsmtLogo {
-    --logo-width: 110px;
+    --logo-width: 100px;
 }
 
 .ercLogo {
-    --logo-width: 90px;
+    --logo-width: 80px;
 }
 
 .kulturfondenLogo {
-    --logo-width: 65px;
+    --logo-width: 60px;
 }
 
 .oellmLogo {
-    --logo-width: 120px;
+    --logo-width: 95px;
 }
