@@ -9,18 +9,17 @@
 
     padding: 12px clamp(16px, 6vw, 60px);
 
-    /* uses the global system */
     background: var(--surface-strong);
     color: var(--text-main);
     border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
 }
 
-/* Left side: logo + search */
-.left {
+.left,
+.actions {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: clamp(12px, 1.6vw, 22px);
 }
 
 .brand {
@@ -35,13 +34,6 @@
     height: auto;
 }
 
-/* Desktop nav links */
-.actions {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
 .link {
     text-decoration: none;
     color: inherit;
@@ -53,10 +45,177 @@
     color: var(--link-hover);
 }
 
-/* Hamburger + mobile menu */
+.linkActive {
+    color: var(--link-hover);
+}
+
+.contributeLink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.52rem 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--link) 28%, var(--border));
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--surface-strong) 86%, var(--link));
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+    font-size: 0.9rem;
+    line-height: 1;
+    font-weight: 650;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+        border-color 160ms ease,
+        background 160ms ease,
+        color 160ms ease,
+        transform 160ms ease;
+}
+
+.contributeLink:hover,
+.contributeLinkActive {
+    border-color: color-mix(in srgb, var(--link) 42%, var(--border));
+    background: color-mix(in srgb, var(--surface-strong) 76%, var(--link));
+    color: var(--link-hover);
+    text-decoration: none;
+}
+
+.contributeLink:active {
+    transform: translateY(1px);
+}
+
+.navGroup {
+    position: relative;
+    display: inline-flex;
+}
+
+.groupButton {
+    cursor: pointer;
+}
+
+.groupActive {
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+    background: linear-gradient(135deg,
+            color-mix(in srgb, var(--accent-soft) 65%, var(--surface-strong)),
+            color-mix(in srgb, var(--surface) 90%, transparent));
+}
+
+.exploreButton {
+    padding-inline: 1rem;
+}
+
+.exploreActive {
+    filter: brightness(1.05);
+}
+
+.chevron {
+    transition: transform 160ms ease;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.navMenu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(280px, calc(100vw - 32px));
+    display: grid;
+    gap: 4px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--surface-strong) 94%, transparent);
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.18), var(--shadow-sm);
+    backdrop-filter: blur(14px) saturate(1.15);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.navMenuOpen {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.navMenuLink {
+    display: grid;
+    gap: 3px;
+    padding: 10px 11px;
+    border-radius: 8px;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: background 160ms ease, color 160ms ease;
+}
+
+.navMenuLink:hover,
+.navMenuLinkActive {
+    color: var(--text-main);
+    text-decoration: none;
+    background: color-mix(in srgb, var(--accent-soft) 58%, transparent);
+}
+
+.navMenuTitle {
+    font-size: 0.9rem;
+    line-height: 1.25;
+    font-weight: 750;
+}
+
+.navMenuDesc {
+    font-size: 0.76rem;
+    line-height: 1.35;
+    color: var(--text-muted);
+}
+
 .burger {
     display: none;
     margin-left: 12px;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 5px;
+    transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.burger:hover {
+    border-color: color-mix(in oklab, var(--accent) 32%, var(--border));
+    background: color-mix(in oklab, var(--surface-strong) 88%, var(--accent-soft));
+}
+
+.burger:active {
+    transform: translateY(1px);
+}
+
+.burgerLine {
+    display: block;
+    width: 18px;
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background: currentColor;
+    transform-origin: center;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.burgerOpen .burgerLine:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.burgerOpen .burgerLine:nth-child(2) {
+    opacity: 0;
+}
+
+.burgerOpen .burgerLine:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
 }
 
 .menu {
@@ -66,35 +225,147 @@
 .menuOpen {
     display: flex;
     flex-direction: column;
+    gap: 0;
 
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: 65px;
     left: 0;
     width: 100%;
+    max-height: calc(100dvh - 65px);
+    overflow-y: auto;
 
-    padding: 20px clamp(16px, 8vw, 60px);
+    padding: 18px clamp(16px, 8vw, 60px) 24px;
 
-    background: var(--surface-strong);
+    background: var(--bg);
     border-bottom: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-    opacity: 0.98;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28), var(--shadow-sm);
     z-index: 1500;
 }
 
 .menuLink {
-    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 12px 0;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
     text-decoration: none;
     color: inherit;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    box-shadow: none;
 }
 
-/* Responsive */
+.menuLink:hover {
+    color: var(--link-hover);
+    background: transparent;
+    text-decoration: none;
+}
+
+.menuLinkActive {
+    color: var(--link-hover);
+}
+
+.mobileContribute {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    width: fit-content;
+    margin: 4px 0 10px;
+    padding: 0.58rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--link) 30%, var(--border));
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--surface-strong) 84%, var(--link));
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+    font-size: 0.95rem;
+    line-height: 1;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.mobileContribute:hover,
+.mobileContributeActive {
+    border-color: color-mix(in srgb, var(--link) 44%, var(--border));
+    background: color-mix(in srgb, var(--surface-strong) 74%, var(--link));
+    color: var(--link-hover);
+    text-decoration: none;
+}
+
+.mobileGroup {
+    display: grid;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.mobileGroupButton {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 42px;
+    width: 100%;
+    padding: 12px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-main);
+    font: inherit;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    cursor: pointer;
+}
+
+.mobileGroupButton:hover {
+    color: var(--link-hover);
+    background: transparent;
+}
+
+.mobileGroupLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+}
+
+.mobileSubmenu {
+    display: none;
+}
+
+.mobileSubmenuOpen {
+    display: grid;
+    gap: 0;
+    padding: 0 0 8px 10px;
+    border-left: 1px solid var(--border);
+}
+
+.mobileSubmenuLink {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 8px 10px;
+    border-radius: 0;
+    color: var(--text-main);
+    text-decoration: none;
+    background: transparent;
+}
+
+.mobileSubmenuLink:hover {
+    color: var(--link-hover);
+    background: transparent;
+    text-decoration: none;
+}
+
 @media (max-width: 1024px) {
     .actions {
         display: none;
     }
 
     .burger {
-        display: block;
+        display: inline-flex;
     }
 }
 

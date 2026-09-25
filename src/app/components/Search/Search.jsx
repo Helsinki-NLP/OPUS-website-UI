@@ -1,101 +1,140 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import {
+  useRouter,
+  useParams,
+  usePathname,
+  useSearchParams,
+} from "next/navigation";
 import { codeToLangTransformer, removeLanguage } from "../../../../hooks/hooks";
 import MiniSelect from "./MiniSelect/MiniSelect";
 import s from "./Search.module.css";
 
-export default function Search({ mode, languageList, navbar }) {
+const DATASET_PAIR_PENDING_EVENT = "opus:dataset-pair-pending";
+
+function normalizePair(a = "", b = "") {
+  const src = String(a).replaceAll("=", "").trim();
+  const trg = String(b).replaceAll("=", "").trim();
+  return src && trg ? { src, trg } : null;
+}
+
+function parseQueryPair(searchString = "") {
+  const i = searchString.indexOf("pair=");
+  if (i < 0) return null;
+
+  const raw = searchString.slice(i + "pair=".length);
+  const [src, trg] = raw.split("&");
+  return normalizePair(src, trg);
+}
+
+function parseRoutePair(langpair = "") {
+  const decoded = decodeURIComponent(String(langpair));
+  const separator = decoded.includes("&") ? "&" : "-";
+  const [src, trg] = decoded.split(separator);
+  return normalizePair(src, trg);
+}
+
+async function fetchLangs({ corpus, navbar, source, signal }) {
+  const corpusFilter = corpus && !navbar ? `&corpus=${corpus}` : "";
+  const sourceFilter =
+    source && corpus && !navbar
+      ? `&source=${source.replace("-", "_")}`
+      : "";
+  const response = await fetch(
+    `/opusapi/?languages=True${corpusFilter}${sourceFilter}`,
+    { method: "GET", signal },
+  );
+
+  const body = await response.json();
+  const clean = (body?.languages || []).filter(
+    (code) => !/\d/.test(code) && !removeLanguage.includes(code),
+  );
+  return { clean, mapped: codeToLangTransformer(clean) };
+}
+
+export default function Search({ mode, languageList, navbar, className = "" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { corpus } = useParams() || {};
+
+  const params = useParams();
+  const langpair = params?.langpair || "";
+  const searchString = searchParams.toString();
+  const initialPair =
+    parseQueryPair(searchString) ||
+    (pathname?.startsWith("/corpora-search/")
+      ? parseRoutePair(langpair)
+      : null);
 
   const [srcOpts, setSrcOpts] = useState([]);
   const [trgOpts, setTrgOpts] = useState([]);
-  const [src, setSrc] = useState("");
-  const [trg, setTrg] = useState("");
-  const [pair, setPair] = useState(null);
-
-  const params = useParams();
-
-  const langpair = params?.langpair || "";
+  const [src, setSrc] = useState(initialPair?.src ?? "");
+  const [trg, setTrg] = useState(initialPair?.trg ?? "");
 
   useEffect(() => {
-    const sp = searchParams.toString();
-    const search = sp ? `?${sp}` : "";
+    const nextPair =
+      parseQueryPair(searchString) ||
+      (pathname?.startsWith("/corpora-search/")
+        ? parseRoutePair(langpair)
+        : null);
 
-    const fromUrl = search.replace("?pair=", "");
-    setPair(fromUrl.replace("=", ""));
-  }, [searchParams]);
-  useEffect(() => {
-    const sp = searchParams.toString();
-    if (langpair && !sp) {
-      setPair(decodeURIComponent(String(langpair)));
-    }
-  }, [langpair]);
+    if (!nextPair) return;
+    setSrc(nextPair.src);
+    setTrg(nextPair.trg);
+  }, [langpair, pathname, searchString]);
 
   useEffect(() => {
-    if (!pair) return;
-    const [o = "", t = ""] = String(pair).split("&");
-    setSrc(o);
-    setTrg(t);
-  }, [pair]);
-
-  async function fetchLangs(kind) {
-    const response = await fetch(
-      `/opusapi/?languages=True${corpus && !navbar ? `&corpus=${corpus}` : ""}${
-        kind === "trg" && corpus && !navbar
-          ? `&source=${src.replace("-", "_")}`
-          : ""
-      }`,
-      {
-        method: "GET",
-      },
-    );
-
-    const body = await response.json();
-    const raw = body?.languages || [];
-    const clean = raw.filter(
-      (code) => !/\d/.test(code) && !removeLanguage.includes(code),
-    );
-    const mapped = codeToLangTransformer(clean); // [{label,value}]
-
-    if (kind === "src") {
-      setSrcOpts(mapped);
-    } else {
-      setTrgOpts(mapped);
-      if (!clean.includes(trg)) setTrg("");
-    }
-  }
-
-  // Preload from prop if given
-  useEffect(() => {
-    if (languageList && languageList.length) {
+    if (languageList) {
       setSrcOpts(languageList);
       return;
     }
-  }, [languageList]);
+
+    const controller = new AbortController();
+    fetchLangs({ corpus, navbar, signal: controller.signal })
+      .then(({ mapped }) => {
+        if (!controller.signal.aborted) setSrcOpts(mapped);
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          console.error("Could not load source languages", error);
+        }
+      });
+
+    return () => controller.abort();
+  }, [languageList, corpus, navbar]);
 
   useEffect(() => {
-    if (!languageList) {
-      fetchLangs("src");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setTrgOpts([]);
+    if (!src) return;
 
-  useEffect(() => {
-    if (corpus) fetchLangs("src");
-  }, [corpus]);
+    const controller = new AbortController();
+    fetchLangs({ corpus, navbar, source: src, signal: controller.signal })
+      .then(({ clean, mapped }) => {
+        if (controller.signal.aborted) return;
+        setTrgOpts(mapped);
+        setTrg((current) => (clean.includes(current) ? current : ""));
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          console.error("Could not load target languages", error);
+        }
+      });
 
-  useEffect(() => {
-    if (src) fetchLangs("trg");
-  }, [src]);
+    return () => controller.abort();
+  }, [src, corpus, navbar]);
 
   function go() {
     if (!src || !trg) return;
     if (mode === "corpusPage") {
-      router.push(`/datasets/${corpus}?pair=${src}&${trg}`);
+      const pair = `${src}&${trg}`;
+      window.dispatchEvent(
+        new CustomEvent(DATASET_PAIR_PENDING_EVENT, {
+          detail: { corpus, pair },
+        }),
+      );
+      router.push(`/datasets/${corpus}?pair=${pair}`, { scroll: false });
     } else {
       router.push(`/corpora-search/${src}&${trg}`);
     }
@@ -104,12 +143,17 @@ export default function Search({ mode, languageList, navbar }) {
   const disabled = !(src && trg);
 
   return (
-    <div className={s.wrap}>
+    <div className={`${s.wrap} ${className}`}>
       <div className={s.field}>
         <MiniSelect
           options={srcOpts}
           value={src}
-          onChange={(v) => setSrc(v)}
+          onChange={(v) => {
+            if (v === src) return;
+            setSrc(v);
+            setTrg("");
+            setTrgOpts([]);
+          }}
           placeholder="Select source"
           disabled={false}
         />
@@ -127,6 +171,7 @@ export default function Search({ mode, languageList, navbar }) {
         className={s.btn}
         onClick={go}
         disabled={disabled}
+        autoComplete="off"
         title={disabled ? "Please select a language pair to search." : ""}
         aria-label="Search"
       >

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-import { Search, Repeat } from "react-feather";
+import { Repeat, Search } from "lucide-react";
 
 import dynamic from "next/dynamic";
 const MainGraph = dynamic(
@@ -104,16 +104,18 @@ export default function MTDashboardClient({ sourceData, targetData }) {
     scoreParam,
     benchmarkParam,
     modelParam,
+    signal,
   ) {
     const url = `/api/dashboardStats/${originParam}&${targetParam}&${scoreParam}&${benchmarkParam}&${encodeURIComponent(
       modelParam,
     )}`;
 
     try {
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetch(url, { cache: "no-store", signal });
 
       // Your old code relied on “body is 404” sometimes; we support both patterns.
       const payload = await safeReadJsonOrText(res);
+      if (signal.aborted) return;
 
       if (payload === 404 || payload === "404") {
         setData(404);
@@ -122,6 +124,7 @@ export default function MTDashboardClient({ sourceData, targetData }) {
 
       setData(payload);
     } catch (e) {
+      if (signal.aborted) return;
       console.error(e);
       setData(404);
     }
@@ -163,8 +166,17 @@ export default function MTDashboardClient({ sourceData, targetData }) {
 
     if (!hasAllParams) return;
 
+    const controller = new AbortController();
     setData("Loading");
-    void getData(originLang, targetLang, scoreInfo, benchmarkInfo, modelInfo);
+    void getData(
+      originLang,
+      targetLang,
+      scoreInfo,
+      benchmarkInfo,
+      modelInfo,
+      controller.signal,
+    );
+    return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originLang, targetLang, scoreInfo, benchmarkInfo, modelInfoRaw]);
 
@@ -412,7 +424,7 @@ export default function MTDashboardClient({ sourceData, targetData }) {
 
             <Legends data={filteredData} modelType={modelType} />
 
-            <div className={s.mainContainer}>
+            <div className={`${s.mainContainer} ${s.balancedResults}`}>
               <div className={s.graphs}>
                 <ModelGraph
                   dashboardValues={filteredData}

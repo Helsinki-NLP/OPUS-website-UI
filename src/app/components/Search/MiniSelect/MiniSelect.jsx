@@ -10,6 +10,7 @@ export default function MiniSelect({
   onChange,
   placeholder = "Select…",
   disabled = false,
+  labelClassName = "",
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -142,7 +143,7 @@ export default function MiniSelect({
   const activeId = `ms-opt-${id}-${activeIdx}`;
 
   return (
-    <div className={ms.box}>
+    <div className={ms.box} data-open={open ? "true" : undefined}>
       <button
         type="button"
         className={ms.btn}
@@ -152,9 +153,14 @@ export default function MiniSelect({
         onClick={() => !disabled && setOpen((o) => !o)}
         onKeyDown={onBtnKeyDown}
         disabled={disabled}
+        autoComplete="off"
         ref={btnRef}
       >
-        {selectedLabel || placeholder}
+        <span
+          className={`${ms.label} ${selectedLabel ? labelClassName : ""}`}
+        >
+          {selectedLabel || placeholder}
+        </span>
         <span className={ms.caret} aria-hidden>
           ▾
         </span>

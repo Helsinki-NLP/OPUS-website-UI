@@ -28,6 +28,8 @@ export default function CorporaTable({
   tableData = [],
   langPair = [],
   showAllVersionsByDefault = false,
+  softSurface = false,
+  showTotals = true,
 }) {
   const [q, setQ] = useState("");
   const [showAllVersions, setShowAllVersions] = useState(
@@ -89,7 +91,7 @@ export default function CorporaTable({
   const total = sorted.length;
 
   return (
-    <section className={s.wrap}>
+    <section className={`${s.wrap} ${softSurface ? s.soft : ""}`}>
       <div className={s.controls}>
         <div className={s.search}>
           <label className={s.label} htmlFor="corpora-search">
@@ -185,17 +187,19 @@ export default function CorporaTable({
               ))}
             </tbody>
 
-            <tfoot>
-              <tr>
-                <th className={s.thName}>Total</th>
-                <th className={s.thNum}>{formatNumber(totals.sents)}</th>
-                <th className={s.thRight}>{formatNumber(totals.srcTok)}</th>
-                <th className={s.thRight}>{formatNumber(totals.trgTok)}</th>
-                <th></th>
-                <th></th>
-                <th></th>
-              </tr>
-            </tfoot>
+            {showTotals && (
+              <tfoot>
+                <tr>
+                  <th className={s.thName}>Total</th>
+                  <th className={s.thNum}>{formatNumber(totals.sents)}</th>
+                  <th className={s.thRight}>{formatNumber(totals.srcTok)}</th>
+                  <th className={s.thRight}>{formatNumber(totals.trgTok)}</th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
       ) : (

@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import Partners from "@/app/components/Partners/Partners";
+import { toast } from "@/app/components/ui/Toast/toast";
 import s from "./page.module.css";
 
 const SITEKEY = "dfde40f9-7ab1-4256-8e66-3a218a095d21";
@@ -53,16 +54,24 @@ export default function ContactPage() {
           Accept: "application/json, text/plain, */*",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, url, message }),
+        body: JSON.stringify({
+          name,
+          email,
+          url,
+          message,
+          captchaToken: token,
+        }),
       });
 
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || `Request failed (${res.status})`);
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok || payload?.status !== "SUCCESS") {
+        throw new Error(payload?.error || `Request failed (${res.status})`);
       }
 
       setStatus("Sent");
-      setNote("Your message was sent successfully.");
+      setNote("Your contribution was sent successfully.");
+      toast.success("Contribution sent successfully");
 
       // reset fields
       if (nameRef.current) nameRef.current.value = "";
@@ -78,6 +87,7 @@ export default function ContactPage() {
       window.setTimeout(() => setStatus("Submit"), 2500);
     } catch (e2) {
       setStatus("Submit");
+      toast.error("Contribution could not be sent");
       setErr("Something went wrong sending your message. Please try again.");
     }
   }
@@ -152,6 +162,15 @@ export default function ContactPage() {
               </label>
             </div>
 
+            {(err || note) && (
+              <p
+                className={`${s.msg} ${err ? s.msgErr : s.msgOk}`}
+                role={err ? "alert" : "status"}
+              >
+                {err || note}
+              </p>
+            )}
+
             <div className={s.actions}>
               <div className={s.captcha}>
                 <HCaptcha
@@ -163,14 +182,6 @@ export default function ContactPage() {
                   }}
                   onExpire={() => setToken("")}
                 />
-                {(err || note) && (
-                  <p
-                    className={`${s.msg} ${err ? s.msgErr : s.msgOk}`}
-                    role={err ? "alert" : "status"}
-                  >
-                    {err || note}
-                  </p>
-                )}
               </div>
 
               <button type="submit" className={s.btn} disabled={disabled}>

@@ -7,19 +7,20 @@ import { languagePairName } from "../../../../../hooks/hooks";
 
 import CorpusDisclaimer from "@/app/components/Dataset/Disclaimer/Disclaimer";
 import StatsTable from "@/app/components/Dataset/Stats/Stats";
-
-import dynamic from "next/dynamic";
-const LanguageGraphsSynthetic = dynamic(
-  () => import("@/app/components/Synthetic/LanguageGraph/LanguageGraph"),
-);
 import SyntheticTable from "@/app/components/Synthetic/ResultTable/ResultTable";
 
 import PairPicker from "./PairPicker";
 import CopyTextButton from "./CopyTextButton";
+import SafeRichText from "@/app/components/ui/SafeRichText/SafeRichText";
+import SyntheticExplorerTabs from "./SyntheticExplorerTabs";
 
 import s from "./page.module.css";
 
 export const revalidate = 900;
+
+const MATRIX_PAIR_MIN = 4;
+const MATRIX_LANGUAGE_LIMIT = 250;
+const MATRIX_PAIR_LIMIT = 7500;
 
 async function fetchYaml(url) {
   const res = await fetch(url, { next: { revalidate } });
@@ -38,6 +39,15 @@ function decodeBibtexBase64(b64) {
   } catch {
     return "";
   }
+}
+
+function countLanguages(rows = []) {
+  const languages = new Set();
+  for (const row of rows) {
+    if (row?.src_lang) languages.add(String(row.src_lang));
+    if (row?.tgt_lang) languages.add(String(row.tgt_lang));
+  }
+  return languages.size;
 }
 
 export async function generateStaticParams() {
@@ -106,6 +116,12 @@ export default async function SyntheticCorpusPage({ params, searchParams }) {
     value: x.lang_pair,
     label: x.langPairName,
   }));
+  const languageCount = countLanguages(graphValuesWithName);
+  const shouldShowMatrix =
+    graphValuesWithName.length >= MATRIX_PAIR_MIN &&
+    graphValuesWithName.length <= MATRIX_PAIR_LIMIT &&
+    languageCount <= MATRIX_LANGUAGE_LIMIT;
+  const matrixRows = shouldShowMatrix ? graphValuesWithName : [];
 
   return (
     <main className={s.wrap}>
@@ -138,9 +154,10 @@ export default async function SyntheticCorpusPage({ params, searchParams }) {
             {license && (
               <div className={s.meta}>
                 <span className={s.metaKey}>License</span>
-                <span
+                <SafeRichText
+                  as="span"
                   className={s.metaVal}
-                  dangerouslySetInnerHTML={{ __html: license }}
+                  html={license}
                 />
               </div>
             )}
@@ -150,26 +167,17 @@ export default async function SyntheticCorpusPage({ params, searchParams }) {
         {copyright && (
           <>
             <h2 className={s.h2}>Copyright</h2>
-            <div
-              className={s.content}
-              dangerouslySetInnerHTML={{ __html: copyright }}
-            />
+            <SafeRichText className={s.content} html={copyright} />
           </>
         )}
 
         {(description || cite) && (
           <div className={s.contentBlock}>
             {description && (
-              <div
-                className={s.content}
-                dangerouslySetInnerHTML={{ __html: description }}
-              />
+              <SafeRichText className={s.content} html={description} />
             )}
             {cite && (
-              <div
-                className={s.content}
-                dangerouslySetInnerHTML={{ __html: cite }}
-              />
+              <SafeRichText className={s.content} html={cite} />
             )}
           </div>
         )}
@@ -187,7 +195,11 @@ export default async function SyntheticCorpusPage({ params, searchParams }) {
 
       <section className={s.card}>
         <div className={s.graphs}>
-          <LanguageGraphsSynthetic graphValues={graphValuesWithName} />
+          <SyntheticExplorerTabs
+            graphValues={graphValuesWithName}
+            matrixRows={matrixRows}
+            title="Explore language pairs"
+          />
         </div>
       </section>
 

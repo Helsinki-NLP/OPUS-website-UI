@@ -10,17 +10,18 @@
 .h,
 .hAlt {
     margin: 0;
-    font-size: 18px;
-    letter-spacing: 0.12em;
+    font-size: clamp(1.12rem, 0.45vw + 1rem, 1.28rem);
+    font-weight: 850;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--text-muted, var(--secondary-copy));
+    color: var(--text-main);
 }
 
 .p,
 .pAlt {
     margin: 0;
     line-height: 1.55;
-    color: var(--text-main, var(--main-copy));
+    color: var(--text-main);
 }
 
 .pAlt span {
@@ -28,7 +29,6 @@
     font-weight: 600;
 }
 
-/* desktop default: show Downloads text, hide Corpus-info text */
 .hAlt,
 .pAlt {
     display: none;
@@ -40,11 +40,8 @@
 
 .res {
     margin-top: 16px;
-    padding: 14px;
-    border-radius: var(--radius-xl, 14px);
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
-    background: var(--surface-strong, var(--sample-box));
-    box-shadow: var(--shadow-sm, 0 6px 18px rgba(0, 0, 0, 0.08));
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
 }
 
 .resHead {
@@ -52,20 +49,30 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .resTitle {
     margin: 0;
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 0.01em;
+    font-size: clamp(1.12rem, 0.45vw + 1rem, 1.26rem);
+    font-weight: 850;
+    letter-spacing: 0;
+    line-height: 1.25;
+}
+
+.loadingArea {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
+    min-height: clamp(150px, 22vw, 220px);
+    display: grid;
+    place-items: center;
 }
 
 .note {
     margin-top: 14px;
     line-height: 1.55;
-    color: var(--text-main, var(--main-copy));
+    color: var(--text-main);
 }
 
 .note span {
@@ -81,10 +88,20 @@
     font-weight: 700;
 }
 
+.loadingMsg {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.04rem;
+    font-weight: 850;
+    color: var(--text-main);
+}
+
 .msgErr {
     margin-top: 14px;
     font-weight: 800;
-    color: color-mix(in oklab, red 55%, var(--text-main, var(--main-copy)));
+    color: color-mix(in oklab, red 55%, var(--text-main));
 }
 
 .msgDim {
@@ -92,7 +109,6 @@
     opacity: 0.8;
 }
 
-/* Same behavior you had at 1100px: switch which title/paragraph is shown */
 @media (max-width: 1100px) {
 
     .h,

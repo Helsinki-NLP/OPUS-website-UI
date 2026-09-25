@@ -1,11 +1,18 @@
 .box {
     position: relative;
-    z-index: 40;
+    z-index: 1;
+    width: 100%;
+    min-width: 0;
+}
+
+.box[data-open="true"] {
+    z-index: 80;
 }
 
 /* Trigger button */
 .btn {
     width: 100%;
+    min-width: 0;
     height: 36px;
     padding: 0 10px;
 
@@ -23,12 +30,24 @@
     font-size: 0.9rem;
     font-weight: 650;
     text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     cursor: pointer;
     user-select: none;
 
     box-shadow: var(--shadow-sm);
     transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.label {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .btn:hover {
@@ -47,6 +66,7 @@
 }
 
 .caret {
+    flex: 0 0 auto;
     opacity: 0.85;
     font-size: 0.85rem;
 }
@@ -54,7 +74,7 @@
 /* Popover */
 .pop {
     position: absolute;
-    z-index: 40;
+    z-index: 1;
     inset-inline: 0;
     margin-top: 8px;
 
@@ -113,6 +133,7 @@
     font: inherit;
     font-size: 0.9rem;
     line-height: 1.2;
+    overflow-wrap: anywhere;
 
     transition: background-color 0.12s ease, color 0.12s ease;
 }

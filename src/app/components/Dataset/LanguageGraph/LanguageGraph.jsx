@@ -17,13 +17,111 @@ import {
   codeToLangTransformer,
   DataFormatter,
 } from "../../../../../hooks/hooks";
+import LoaderSpinner from "../../ui/LoaderSpinner/LoaderSpinner";
 import PairsGraph from "../PairsGraph/PairsGraph";
 import s from "./LanguageGraph.module.css";
 
 const nfCompact = new Intl.NumberFormat("en", { notation: "compact" });
+const DEFAULT_BRUSH_END = 10;
+const GRAPH_LOADER_SIZE = 26;
+const DATASET_PAIR_PENDING_EVENT = "opus:dataset-pair-pending";
 
 function asString(v) {
   return Array.isArray(v) ? v[0] : v || "";
+}
+
+function isBrushEvent(event) {
+  return Boolean(event?.target?.closest?.(".recharts-brush"));
+}
+
+function payloadFromLabel(rows, label, dataKey) {
+  if (label == null) return null;
+  return rows.find((row) => String(row?.[dataKey]) === String(label)) ?? null;
+}
+
+function defaultBrushRange(len) {
+  const max = Math.max(0, len - 1);
+  return {
+    startIndex: 0,
+    endIndex: Math.min(DEFAULT_BRUSH_END, max),
+  };
+}
+
+function clampIndex(value, fallback, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(0, Math.min(Math.round(n), max));
+}
+
+function normalizeBrushRange(range, len, fallback = defaultBrushRange(len)) {
+  const max = Math.max(0, len - 1);
+  if (max <= 0) return { startIndex: 0, endIndex: 0 };
+
+  const safeFallback = {
+    startIndex: clampIndex(fallback?.startIndex, 0, max),
+    endIndex: clampIndex(
+      fallback?.endIndex,
+      Math.min(DEFAULT_BRUSH_END, max),
+      max,
+    ),
+  };
+
+  let startIndex = clampIndex(range?.startIndex, safeFallback.startIndex, max);
+  let endIndex = clampIndex(range?.endIndex, safeFallback.endIndex, max);
+
+  if (endIndex < startIndex) {
+    [startIndex, endIndex] = [endIndex, startIndex];
+  }
+
+  if (endIndex === startIndex && max > 0) {
+    if (startIndex === max) startIndex -= 1;
+    else endIndex += 1;
+  }
+
+  return { startIndex, endIndex };
+}
+
+function sameBrushRange(a, b) {
+  return a?.startIndex === b?.startIndex && a?.endIndex === b?.endIndex;
+}
+
+function sameGraphValues(a, b) {
+  if (a === b) return true;
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
+    return false;
+  }
+
+  return a.every((row, index) => {
+    const other = b[index];
+    return (
+      row?.name === other?.name &&
+      row?.sentences === other?.sentences &&
+      row?.perc === other?.perc
+    );
+  });
+}
+
+function useStableGraphValues(graphValues) {
+  const rows = Array.isArray(graphValues) ? graphValues : [];
+  const rowsRef = useRef(rows);
+
+  if (!sameGraphValues(rowsRef.current, rows)) {
+    rowsRef.current = rows;
+  }
+
+  return rowsRef.current;
+}
+
+function isFullRangeReset(next, previous, len) {
+  const max = Math.max(0, len - 1);
+  const previousSpan = (previous?.endIndex ?? 0) - (previous?.startIndex ?? 0);
+
+  return (
+    max > DEFAULT_BRUSH_END &&
+    next.startIndex === 0 &&
+    next.endIndex === max &&
+    previousSpan < max
+  );
 }
 
 function Tip({ title, rows }) {
@@ -64,45 +162,125 @@ export default function LanguageGraphs({ graphValues = [] }) {
   const searchParams = useSearchParams();
 
   const corpus = useMemo(() => asString(params?.corpus), [params]);
+  const searchKey = searchParams?.toString() ?? "";
+  const chartValues = useStableGraphValues(graphValues);
 
   const [status, setStatus] = useState("idle");
   const [currentLang, setCurrentLang] = useState("");
   const [pairs, setPairs] = useState([]);
+  const [pairLoading, setPairLoading] = useState(false);
+  const [loadingPairLabel, setLoadingPairLabel] = useState("");
 
-  const hasData = Array.isArray(graphValues) && graphValues.length > 0;
+  const hasData = chartValues.length > 0;
 
-  const len = graphValues?.length ?? 0;
+  const len = chartValues.length;
   const showBrush = len > 1;
 
-  const lastGoodRef = useRef({
-    startIndex: 0,
-    endIndex: Math.min(10, Math.max(1, len - 1)),
-  });
+  const lastGoodRef = useRef(defaultBrushRange(len));
+  const brushGestureRef = useRef(false);
+  const brushGestureTimerRef = useRef(null);
+  const brushRef = useRef(defaultBrushRange(len));
+  const pairLoadingTimerRef = useRef(null);
+  const previousSearchKeyRef = useRef(searchKey);
+  const activeLangRef = useRef(null);
+  const directBarClickRef = useRef(0);
 
-  const [brush, setBrush] = useState(() => {
-    if (len <= 1) return { startIndex: 0, endIndex: 1 };
-    return { startIndex: 0, endIndex: Math.min(10, len - 1) };
-  });
+  const [brush, setBrush] = useState(() => defaultBrushRange(len));
+  const [brushRevision, setBrushRevision] = useState(0);
 
   useEffect(() => {
-    if (len <= 1) return;
     setBrush((prev) => {
-      const max = len - 1;
-      const s = Math.max(
-        0,
-        Math.min(prev?.startIndex ?? lastGoodRef.current.startIndex, max),
-      );
-      const desiredEnd = prev?.endIndex ?? lastGoodRef.current.endIndex;
-      const e = Math.max(1, Math.min(desiredEnd, max));
-      const next = { startIndex: s, endIndex: e };
+      const next = normalizeBrushRange(prev, len, lastGoodRef.current);
       lastGoodRef.current = next;
-      return next;
+      brushRef.current = next;
+      return sameBrushRange(prev, next) ? prev : next;
     });
   }, [len]);
 
-  const brushKey = useMemo(() => {
-    return `${corpus}::${searchParams?.toString() ?? ""}`;
-  }, [corpus, searchParams]);
+  useEffect(() => {
+    return () => {
+      if (brushGestureTimerRef.current) {
+        clearTimeout(brushGestureTimerRef.current);
+      }
+      if (pairLoadingTimerRef.current) {
+        clearTimeout(pairLoadingTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!pairLoading) {
+      previousSearchKeyRef.current = searchKey;
+      return;
+    }
+
+    if (searchKey !== previousSearchKeyRef.current) {
+      if (pairLoadingTimerRef.current) {
+        clearTimeout(pairLoadingTimerRef.current);
+      }
+      setPairLoading(false);
+      setLoadingPairLabel("");
+      previousSearchKeyRef.current = searchKey;
+    }
+  }, [pairLoading, searchKey]);
+
+  const brushKey = useMemo(
+    () => `${corpus}::${len}::${brushRevision}`,
+    [corpus, len, brushRevision],
+  );
+
+  const endBrushGesture = useCallback(() => {
+    if (brushGestureTimerRef.current) {
+      clearTimeout(brushGestureTimerRef.current);
+    }
+
+    brushGestureTimerRef.current = window.setTimeout(() => {
+      brushGestureRef.current = false;
+    }, 250);
+  }, []);
+
+  const onChartPointerDown = useCallback((event) => {
+    if (event.target?.closest?.(".recharts-brush")) {
+      brushGestureRef.current = true;
+
+      if (brushGestureTimerRef.current) {
+        clearTimeout(brushGestureTimerRef.current);
+      }
+
+      brushGestureTimerRef.current = window.setTimeout(() => {
+        brushGestureRef.current = false;
+      }, 3000);
+    }
+  }, []);
+
+  const onBrushChange = useCallback(
+    (range) => {
+      if (!range || len <= 1) return;
+
+      const fallback = normalizeBrushRange(
+        brushRef.current,
+        len,
+        lastGoodRef.current,
+      );
+      const next = normalizeBrushRange(range, len, fallback);
+
+      if (
+        !brushGestureRef.current &&
+        isFullRangeReset(next, fallback, len)
+      ) {
+        lastGoodRef.current = fallback;
+        brushRef.current = fallback;
+        setBrush(fallback);
+        setBrushRevision((revision) => revision + 1);
+        return;
+      }
+
+      lastGoodRef.current = next;
+      brushRef.current = next;
+      setBrush((prev) => (sameBrushRange(prev, next) ? prev : next));
+    },
+    [len],
+  );
 
   const fetchPairs = useCallback(
     async (source) => {
@@ -134,22 +312,85 @@ export default function LanguageGraphs({ graphValues = [] }) {
   );
 
   const onLangBarClick = useCallback(
-    (bar) => {
-      const lang = bar?.payload?.name;
+    (payload) => {
+      const lang = payload?.name;
       if (!lang) return;
+      if (pairLoadingTimerRef.current) {
+        clearTimeout(pairLoadingTimerRef.current);
+      }
+      setPairLoading(false);
+      setLoadingPairLabel("");
       setCurrentLang(lang);
       fetchPairs(lang);
     },
     [fetchPairs],
   );
 
+  const onLangChartClick = useCallback(
+    (chartState, event) => {
+      if (isBrushEvent(event)) return;
+      if (Date.now() - directBarClickRef.current < 100) return;
+
+      const payload =
+        payloadFromLabel(chartValues, chartState?.activeLabel, "name") ??
+        activeLangRef.current;
+      if (payload) onLangBarClick(payload);
+    },
+    [chartValues, onLangBarClick],
+  );
+
+  const onLangChartMouseMove = useCallback(
+    (chartState) => {
+      activeLangRef.current = chartState?.isTooltipActive
+        ? payloadFromLabel(chartValues, chartState.activeLabel, "name")
+        : null;
+    },
+    [chartValues],
+  );
+
+  const onLangChartMouseLeave = useCallback(() => {
+    activeLangRef.current = null;
+  }, []);
+
+  const onLangBarDirectClick = useCallback(
+    (bar) => {
+      directBarClickRef.current = Date.now();
+      onLangBarClick(bar?.payload);
+    },
+    [onLangBarClick],
+  );
+
   const onPickPair = useCallback(
     (p) => {
       if (!p?.source || !p?.target || !corpus) return;
       const pair = `${p.source}&${p.target}`.replaceAll("-", "_");
+      const labels = codeToLangTransformer([p.source, p.target]);
+      const fallbackLabel = `${p.source} - ${p.target}`;
+      const pairLabel =
+        labels?.length === 2
+          ? `${labels[0].label} - ${labels[1].label}`
+          : fallbackLabel;
+
+      if (pairLoadingTimerRef.current) {
+        clearTimeout(pairLoadingTimerRef.current);
+      }
+
+      previousSearchKeyRef.current = searchKey;
+      setPairLoading(true);
+      setLoadingPairLabel(pairLabel);
+      pairLoadingTimerRef.current = window.setTimeout(() => {
+        setPairLoading(false);
+        setLoadingPairLabel("");
+      }, 2500);
+
+      window.dispatchEvent(
+        new CustomEvent(DATASET_PAIR_PENDING_EVENT, {
+          detail: { corpus, pair },
+        }),
+      );
       router.push(`/datasets/${corpus}?pair=${pair}`, { scroll: false });
     },
-    [router, corpus],
+    [router, corpus, searchKey],
   );
 
   const currentLangLabel =
@@ -168,11 +409,19 @@ export default function LanguageGraphs({ graphValues = [] }) {
             </p>
           </header>
 
-          <div className={s.chart}>
+          <div
+            className={`${s.chart} ${s.clickableChart}`}
+            onPointerDownCapture={onChartPointerDown}
+            onPointerUpCapture={endBrushGesture}
+            onPointerCancelCapture={endBrushGesture}
+          >
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
-                data={graphValues}
+                data={chartValues}
                 margin={{ top: 8, right: 10, left: 0, bottom: 8 }}
+                onClick={onLangChartClick}
+                onMouseMove={onLangChartMouseMove}
+                onMouseLeave={onLangChartMouseLeave}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" fontSize={12} tickMargin={8} />
@@ -185,19 +434,12 @@ export default function LanguageGraphs({ graphValues = [] }) {
                 {showBrush && (
                   <Brush
                     key={brushKey}
+                    dataKey="name"
                     height={18}
                     startIndex={brush.startIndex}
                     endIndex={brush.endIndex}
-                    data={graphValues}
-                    onChange={(r) => {
-                      if (!r || len <= 1) return;
-                      const max = len - 1;
-                      const s = Math.max(0, Math.min(r.startIndex ?? 0, max));
-                      const e = Math.max(1, Math.min(r.endIndex ?? max, max));
-                      const next = { startIndex: s, endIndex: e };
-                      lastGoodRef.current = next;
-                      setBrush(next);
-                    }}
+                    data={chartValues}
+                    onChange={onBrushChange}
                   />
                 )}
 
@@ -205,7 +447,8 @@ export default function LanguageGraphs({ graphValues = [] }) {
                   dataKey="sentences"
                   fill="#6D5BFF"
                   activeBar={{ fill: "#B9B1FF" }}
-                  onClick={onLangBarClick}
+                  cursor="pointer"
+                  onClick={onLangBarDirectClick}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -220,7 +463,7 @@ export default function LanguageGraphs({ graphValues = [] }) {
 
             {status === "loading" && (
               <div className={s.loading}>
-                <span className={s.spinner} aria-hidden="true" />
+                <LoaderSpinner size={GRAPH_LOADER_SIZE} decorative />
                 <span>Loading pairs for {currentLangLabel || "…"}</span>
               </div>
             )}
@@ -250,6 +493,8 @@ export default function LanguageGraphs({ graphValues = [] }) {
             currentLang={currentLang}
             currentLangLabel={currentLangLabel}
             onPickPair={onPickPair}
+            pairLoading={pairLoading}
+            loadingPairLabel={loadingPairLabel}
           />
         </section>
       )}

@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 
 import { languagePairName } from "../../../../../hooks/hooks";
 import SearchWithSuspense from "@/app/components/Search/SearchWithSuspense";
 import CorporaTable from "@/app/components/CorporaSearchTable/Table";
 import Overlaps from "../Overlaps/Overlaps";
+import LoaderSpinner from "../../ui/LoaderSpinner/LoaderSpinner";
 
 import s from "./Container.module.css";
+
+const DOWNLOADS_LOADER_SIZE = 42;
+const DATASET_PAIR_PENDING_EVENT = "opus:dataset-pair-pending";
 
 function parsePair(searchParams) {
   const qs = searchParams?.toString?.() ?? "";
@@ -45,14 +49,69 @@ export default function CorpusPageContainer({ version = "" }) {
   const pair = useMemo(() => parsePair(searchParams), [searchParams]);
 
   const [tableData, setTableData] = useState([]); // always array
+  const [tablePair, setTablePair] = useState("");
   const [overlapData, setOverlapData] = useState(null);
+  const [overlapPair, setOverlapPair] = useState("");
+  const [pendingPair, setPendingPair] = useState("");
   const [status, setStatus] = useState({ table: "idle", tsv: "idle" }); // idle|loading|ok|error
   const [err, setErr] = useState({ table: "", tsv: "" });
+  const pendingPairTimerRef = useRef(null);
 
   const langPair = useMemo(() => {
     if (!pair) return null;
     return languagePairName(pair.split("&"));
   }, [pair]);
+
+  useEffect(() => {
+    return () => {
+      if (pendingPairTimerRef.current) {
+        clearTimeout(pendingPairTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    function onPendingPair(event) {
+      const nextCorpus = String(event?.detail?.corpus ?? "");
+      const nextPair = String(event?.detail?.pair ?? "");
+      if (!nextPair || nextCorpus !== String(corpus ?? "")) return;
+      if (nextPair === pair && tablePair === pair && status.table !== "loading") {
+        return;
+      }
+
+      if (pendingPairTimerRef.current) {
+        clearTimeout(pendingPairTimerRef.current);
+      }
+
+      setPendingPair(nextPair);
+      setTableData([]);
+      setTablePair("");
+      setOverlapData(null);
+      setOverlapPair("");
+      setErr({ table: "", tsv: "" });
+      setStatus({ table: "loading", tsv: "loading" });
+
+      pendingPairTimerRef.current = window.setTimeout(() => {
+        setPendingPair("");
+      }, 4000);
+    }
+
+    window.addEventListener(DATASET_PAIR_PENDING_EVENT, onPendingPair);
+    return () => {
+      window.removeEventListener(DATASET_PAIR_PENDING_EVENT, onPendingPair);
+    };
+  }, [corpus, pair, status.table, tablePair]);
+
+  useEffect(() => {
+    if (!pendingPair || tablePair !== pendingPair || status.table === "loading") {
+      return;
+    }
+
+    if (pendingPairTimerRef.current) {
+      clearTimeout(pendingPairTimerRef.current);
+    }
+    setPendingPair("");
+  }, [pendingPair, status.table, tablePair]);
 
   useEffect(() => {
     if (!corpus || !pair) return;
@@ -62,8 +121,11 @@ export default function CorpusPageContainer({ version = "" }) {
     const acTsv = new AbortController();
 
     // reset for new query
+    setPendingPair((current) => (current === pair ? current : ""));
     setTableData([]);
+    setTablePair("");
     setOverlapData(null);
+    setOverlapPair("");
     setErr({ table: "", tsv: "" });
     setStatus({ table: "loading", tsv: "loading" });
 
@@ -98,9 +160,12 @@ export default function CorpusPageContainer({ version = "" }) {
 
         if (!alive) return;
         setTableData(rows);
+        setTablePair(pair);
         setStatus((p) => ({ ...p, table: "ok" }));
       } catch (e) {
         if (!alive) return;
+        setTableData([]);
+        setTablePair(pair);
         setStatus((p) => ({ ...p, table: "error" }));
         setErr((p) => ({
           ...p,
@@ -119,6 +184,8 @@ export default function CorpusPageContainer({ version = "" }) {
         if (!res.ok) {
           // don't throw hard; just mark as unavailable
           if (!alive) return;
+          setOverlapData(null);
+          setOverlapPair(pair);
           setStatus((p) => ({ ...p, tsv: "error" }));
           setErr((p) => ({ ...p, tsv: `Overlap unavailable (${res.status})` }));
           return;
@@ -127,11 +194,14 @@ export default function CorpusPageContainer({ version = "" }) {
         const data = await safeJson(res);
 
         if (!alive) return;
-        // expects { values: ... } like your old axios usage
+        // expects { values: ... } from the overlap endpoint
         setOverlapData(data);
+        setOverlapPair(pair);
         setStatus((p) => ({ ...p, tsv: "ok" }));
       } catch (e) {
         if (!alive) return;
+        setOverlapData(null);
+        setOverlapPair(pair);
         setStatus((p) => ({ ...p, tsv: "error" }));
         setErr((p) => ({ ...p, tsv: e?.message || "Overlap unavailable" }));
       }
@@ -145,8 +215,21 @@ export default function CorpusPageContainer({ version = "" }) {
   }, [corpus, pair, version]);
 
   const hasPair = Boolean(pair);
-  const loading = status.table === "loading";
-  const hasRows = tableData.length > 0;
+  const hasActivePair = Boolean(pendingPair || pair);
+  const tableMatchesPair = hasPair && tablePair === pair;
+  const overlapMatchesPair = !pendingPair && hasPair && overlapPair === pair;
+  const visibleTableData = !pendingPair && tableMatchesPair ? tableData : [];
+  const loading =
+    Boolean(pendingPair) ||
+    (hasPair && (status.table === "loading" || !tableMatchesPair));
+  const tableError = hasPair && !loading && status.table === "error";
+  const tableEmpty =
+    hasPair &&
+    !loading &&
+    status.table === "ok" &&
+    visibleTableData.length === 0;
+  const tsvError = hasPair && overlapMatchesPair && status.tsv === "error";
+  const hasRows = visibleTableData.length > 0;
 
   return (
     <section id="download" className={s.wrap}>
@@ -167,18 +250,22 @@ export default function CorpusPageContainer({ version = "" }) {
       <div className={s.search}>
         <SearchWithSuspense mode="corpusPage" />
       </div>
-      {hasPair && loading && <p className={s.msg}>Loading results…</p>}
-      {hasPair && !loading && status.table === "error" && (
+      {tableError && (
         <p className={s.msgErr}>{err.table || "Could not load results."}</p>
       )}
-      {hasPair &&
-        !loading &&
-        status.table === "ok" &&
-        tableData.length === 0 && (
-          <p className={s.msg}>
-            We’re sorry. No results were found for your search.
+      {tableEmpty && (
+        <p className={s.msg}>
+          We’re sorry. No results were found for your search.
+        </p>
+      )}
+      {hasActivePair && loading && (
+        <div className={s.loadingArea} role="status">
+          <p className={s.loadingMsg}>
+            <LoaderSpinner size={DOWNLOADS_LOADER_SIZE} decorative />
+            <span>Loading results…</span>
           </p>
-        )}
+        </div>
+      )}
       {hasPair && hasRows && langPair && (
         <div className={s.res}>
           <div className={s.resHead}>
@@ -187,25 +274,28 @@ export default function CorpusPageContainer({ version = "" }) {
             </h3>
           </div>
           <CorporaTable
-            tableData={tableData}
+            tableData={visibleTableData}
             langPair={langPair}
             showAllVersionsByDefault
+            softSurface
+            showTotals={false}
           />
         </div>
       )}
-      pk_live_ab7b2bef0a9efcde4b01442f0edfc2601bdbf3deb940404a
-      <p className={s.note}>
-        <span>A note on formats:</span> TMX files contain only unique
-        translation units. Moses downloads include all non-empty alignment units
-        including duplicates. Token counts for each language also include
-        duplicate sentences and documents.
-      </p>
-      {overlapData?.values && langPair && (
+      {hasPair && hasRows && (
+        <p className={s.note}>
+          <span>A note on formats:</span> TMX files contain only unique
+          translation units. Moses downloads include all non-empty alignment
+          units including duplicates. Token counts for each language also
+          include duplicate sentences and documents.
+        </p>
+      )}
+      {overlapMatchesPair && overlapData?.values && langPair && (
         <div className={s.graph}>
           <Overlaps values={overlapData.values} result={langPair} />
         </div>
       )}
-      {hasPair && status.tsv === "error" && (
+      {tsvError && (
         <p className={s.msgDim}>{err.tsv}</p>
       )}
     </section>

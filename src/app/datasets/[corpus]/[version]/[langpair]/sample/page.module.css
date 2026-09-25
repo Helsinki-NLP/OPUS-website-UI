@@ -1,16 +1,14 @@
 .wrap {
-    padding: clamp(18px, 4vw, 46px) clamp(14px, 6vw, 120px);
-    color: var(--main-copy);
-    background: var(--main-background);
+    width: var(--page-container-width);
+    margin: 0 auto;
+    padding: var(--page-shell-padding);
+    color: var(--text-main);
     min-height: 60vh;
 }
 
 .card {
-    border-radius: var(--radius-xl, 18px);
-    border: 1px solid var(--table-border);
-    background: color-mix(in oklab, var(--main-background) 92%, white 8%);
-    box-shadow: var(--shadow-sm);
-    padding: clamp(14px, 2.2vw, 22px);
+    padding: 8px 0 14px;
+    border-bottom: 1px solid color-mix(in oklab, var(--table-border) 72%, transparent);
 }
 
 .head {
@@ -23,9 +21,9 @@
 
 .title {
     margin: 0;
-    font-size: clamp(1.05rem, 1.4vw, 1.35rem);
-    line-height: 1.5;
-    letter-spacing: 0.01em;
+    font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+    line-height: 1.35;
+    letter-spacing: 0;
 }
 
 .ver {
@@ -34,7 +32,8 @@
     opacity: 0.85;
 }
 
-.actions {
+.actions,
+.rows {
     display: flex;
     gap: 10px;
     align-items: center;
@@ -50,13 +49,13 @@
 }
 
 .corpusLink {
-    color: var(--desc-link-color);
+    color: var(--link);
     text-decoration: none;
     font-weight: 800;
 }
 
 .corpusLink:hover {
-    color: var(--navlink-hover-color);
+    color: var(--link-hover);
 }
 
 .toolbar {
@@ -79,12 +78,6 @@
     border-top: 1px solid color-mix(in oklab, var(--table-border) 65%, transparent);
 }
 
-.rows {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
 .pager {
     display: flex;
     gap: 10px;
@@ -98,7 +91,7 @@
 }
 
 .list {
-    margin-top: 14px;
+    margin-top: 0;
     display: grid;
-    gap: 10px;
+    gap: 0;
 }

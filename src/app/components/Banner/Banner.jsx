@@ -4,19 +4,31 @@ import s from "./Banner.module.css";
 import Logo from "@/../public/logos/banner-logo.png";
 import LogoDark from "@/../public/logos/banner-logo-white.png";
 
-export default function Banner() {
+export default function Banner({ children }) {
+  const hasNews = Boolean(children);
+
   return (
     <section className={s.wrap}>
-      <Image src={Logo} width={280} alt="opus logo" data-hide-on-theme="dark" />
-      <Image
-        src={LogoDark}
-        width={280}
-        alt="opus logo"
-        data-hide-on-theme="light"
-      />
-      <div className={s.box}>
-        <h1 className={s.title}>Find your corpora</h1>
-        <SearchWithSuspense />
+      <div className={`${s.content} ${hasNews ? "" : s.contentNoNews}`}>
+        {children && <div className={s.news}>{children}</div>}
+        <Image
+          src={Logo}
+          width={280}
+          alt="opus logo"
+          className={s.logo}
+          data-hide-on-theme="dark"
+        />
+        <Image
+          src={LogoDark}
+          width={280}
+          alt="opus logo"
+          className={s.logo}
+          data-hide-on-theme="light"
+        />
+        <div className={s.box}>
+          <h1 className={s.title}>Find your corpora</h1>
+          <SearchWithSuspense className={s.search} />
+        </div>
       </div>
     </section>
   );

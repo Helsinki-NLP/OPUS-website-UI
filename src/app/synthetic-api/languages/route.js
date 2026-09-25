@@ -20,7 +20,7 @@ export async function GET(req) {
     } catch (err) {
         console.error("[/synthetic-api/languages] Error:", err);
         return NextResponse.json(
-            { error: "languages_failed", details: String(err?.message || err) },
+            { error: "languages_failed" },
             { status: 500 }
         );
     }

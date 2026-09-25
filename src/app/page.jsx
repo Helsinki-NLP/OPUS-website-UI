@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { load as yamlLoad } from "js-yaml";
 
 import Banner from "./components/Banner/Banner";
 import Partners from "./components/Partners/Partners";
-import News from "./components/News/News";
 import SizesTable from "./components/SizesTable/SizesTable";
 import { removeLanguage } from "../../hooks/hooks";
 import { callPythonReadData } from "@/lib/pythonClient";
@@ -25,21 +23,10 @@ export const viewport = {
 
 export const revalidate = 50000;
 
-async function fetchText(url) {
-  const res = await fetch(url, { next: { revalidate } });
-  if (!res.ok) {
-    throw new Error(`Fetch failed (${res.status}) for ${url}`);
-  }
-  return res.text();
-}
-
 async function getHomeData() {
   const { languages: rawLanguages } = await callPythonReadData({
     languages: "True",
   });
-  const yamlText = await fetchText(
-    "https://raw.githubusercontent.com/lukasweymann/OPUS/refs/heads/patch-1/info/news.yaml",
-  );
   const corpora = await callPythonReadData({
     preprocessing: "xml",
     version: "latest",
@@ -48,8 +35,6 @@ async function getHomeData() {
     corpora: "True",
     version: "latest",
   });
-
-  const yamlToJson = yamlLoad(yamlText);
 
   // 1) Languages
   const cleanLanguages = rawLanguages.filter(
@@ -129,7 +114,6 @@ async function getHomeData() {
     totalCleanCorpora,
     biggestDatasetsPercentage,
     biggestDatasets,
-    yamlToJson,
   };
 }
 
@@ -141,53 +125,49 @@ export default async function Home() {
     totalCleanCorpora,
     biggestDatasetsPercentage,
     biggestDatasets,
-    yamlToJson,
   } = await getHomeData();
 
   return (
-    <>
-      <main className={s.page}>
-        {yamlToJson && (
-          <div className={s.news}>
-            {" "}
-            <News news={yamlToJson.NEWS} />{" "}
+    <main className={s.page}>
+      <div className={s.container}>
+        <Banner />
+
+        <section className={s.overview}>
+          <div className={s.summary}>
+            <h2>An overview of the OPUS collection</h2>
+
+            <div className={s.kpis}>
+              <p>
+                <Link href="/corpora" className={s.kpiLink}>
+                  <span>{totalCorporaCount.toLocaleString("en-US")}</span>{" "}
+                  corpora
+                </Link>
+              </p>
+              <p>
+                <span>{total.toLocaleString("en-US")}</span> total sentence
+                pairs
+              </p>
+              <p>
+                <span>{cleanLanguages.length}</span> languages available
+              </p>
+
+              <p className={s.note}>
+                This table displays <span>{totalCleanCorpora}</span> corpora,
+                which make up a total{" "}
+                <span>{biggestDatasetsPercentage.toFixed(2)}%</span> of the
+                entire <span>OPUS</span> collection
+              </p>
+
+            </div>
           </div>
-        )}
-        <Banner languageList={cleanLanguages} />
-      </main>
+          <SizesTable corpora={biggestDatasets} />
+        </section>
 
-      <section className={s.overview}>
-        <div className={s.summary}>
-          <h2>An overview of the OPUS collection</h2>
-
-          <div className={s.kpis}>
-            <p>
-              <Link href="/corpora" className={s.kpiLink}>
-                <span>{totalCorporaCount.toLocaleString("en-US")}</span> corpora
-              </Link>
-            </p>
-            <p>
-              <span>{total.toLocaleString("en-US")}</span> total sentence pairs
-            </p>
-            <p>
-              <span>{cleanLanguages.length}</span> languages available
-            </p>
-
-            <p className={s.note}>
-              This table displays <span>{totalCleanCorpora}</span> corpora,
-              which make up a total{" "}
-              <span>{biggestDatasetsPercentage.toFixed(2)}%</span> of the entire{" "}
-              <span>OPUS</span> collection
-            </p>
-          </div>
-        </div>
-        <SizesTable corpora={biggestDatasets} />
-      </section>
-
-      <section className={s.partners}>
-        <h2>Our contributors</h2>
-        <Partners />
-      </section>
-    </>
+        <section className={s.partners}>
+          <h2>Funding and Support</h2>
+          <Partners />
+        </section>
+      </div>
+    </main>
   );
 }

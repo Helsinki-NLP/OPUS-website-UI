@@ -3,9 +3,15 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Cross as Hamburger } from "hamburger-react";
+import { ArrowRightLeft, GitCompare, History } from "lucide-react";
 
 import s from "./Banner.module.css";
+
+const LINK_ICONS = {
+  scores: ArrowRightLeft,
+  models: GitCompare,
+  history: History,
+};
 
 export default function DashboardBanner() {
   const [open, setOpen] = useState(false);
@@ -44,11 +50,16 @@ export default function DashboardBanner() {
           </h1>
 
           <nav className={s.nav} aria-label="Dashboard">
-            {links.map((l) => (
-              <Link key={l.key} href={l.href} className={s.link}>
-                {l.label}
-              </Link>
-            ))}
+            {links.map((l) => {
+              const Icon = LINK_ICONS[l.key] ?? ArrowRightLeft;
+
+              return (
+                <Link key={l.key} href={l.href} className={s.link}>
+                  <Icon className={s.linkIcon} size={16} strokeWidth={1.9} />
+                  <span>{l.label}</span>
+                </Link>
+              );
+            })}
           </nav>
 
           <button
@@ -59,7 +70,9 @@ export default function DashboardBanner() {
             aria-controls="dashboard-menu"
             onClick={() => setOpen((v) => !v)}
           >
-            <Hamburger toggled={open} toggle={setOpen} />
+            <span className={s.burgerLine} />
+            <span className={s.burgerLine} />
+            <span className={s.burgerLine} />
           </button>
         </div>
 
@@ -68,16 +81,21 @@ export default function DashboardBanner() {
           className={`${s.menu} ${open ? s.menuOpen : ""}`}
           aria-label="Dashboard mobile"
         >
-          {links.map((l) => (
-            <Link
-              key={`m-${l.key}`}
-              href={l.href}
-              className={s.menuLink}
-              onClick={() => setOpen(false)}
-            >
-              {l.label}
-            </Link>
-          ))}
+          {links.map((l) => {
+            const Icon = LINK_ICONS[l.key] ?? ArrowRightLeft;
+
+            return (
+              <Link
+                key={`m-${l.key}`}
+                href={l.href}
+                className={s.menuLink}
+                onClick={() => setOpen(false)}
+              >
+                <Icon className={s.linkIcon} size={16} strokeWidth={1.9} />
+                <span>{l.label}</span>
+              </Link>
+            );
+          })}
         </nav>
       </header>
     </Suspense>
